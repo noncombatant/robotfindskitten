@@ -168,17 +168,16 @@ static void randomize_messages(void) {
 #define randx() (FRAME + (random() % (state.cols - FRAME * 2)))
 #define randy() \
   (HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2)))
-#define randch() (random() % ('~' - '!' + 1) + '!')
 #define randbold() ((random() % 2) ? true : false)
 #define randcolor() (random() % 6 + 1)
 #define randint(m, n) ((m) + (random() % ((n) + 1)))
 
-static char randchar(void) {
-  char ch;
+static chtype random_character(void) {
+  chtype c;
   do {
-    ch = randch();
-  } while (ch == '#');
-  return ch;
+    c = (random() % ('~' - '!' + 1) + '!');
+  } while (c == '#');
+  return c;
 }
 
 static bool object_equal(const screen_object a, const screen_object b) {
@@ -238,7 +237,7 @@ static void initialize(size_t item_count) {
   state.items[ROBOT].x = randx();
 
   /* set up kitten */
-  state.items[KITTEN].character = (chtype)randchar();
+  state.items[KITTEN].character = random_character();
   state.items[KITTEN].bold = randbold();
   state.items[KITTEN].reverse = false;
   do {
@@ -248,7 +247,7 @@ static void initialize(size_t item_count) {
 
   /* set up items */
   for (i = BOGUS; i < BOGUS + item_count; i++) {
-    state.items[i].character = (chtype)randchar();
+    state.items[i].character = random_character();
     state.items[i].bold = randbold();
     state.items[i].reverse = false;
     while (true) {
