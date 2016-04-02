@@ -264,6 +264,10 @@ static void read_messages(void) {
   for (i = 0; i < BOGUS; i++)
     add_message("", 1);
 
+  for (i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
+    add_message(Messages[i], strlen(Messages[i]) + 1);
+  }
+
   do_read_messages(SYSTEM_NKI_DIR);
 
   /* coverity[tainted_data] Safe, never handed to exec */
