@@ -127,9 +127,9 @@ typedef struct {
   int lines;
   int cols;
   unsigned int options;
-  unsigned int num_items;
-  unsigned int num_messages;
-  unsigned int num_messages_alloc;
+  size_t num_items;
+  size_t num_messages;
+  size_t num_messages_alloc;
   screen_object* items;
   char** messages;
 } game_state;
@@ -149,7 +149,7 @@ static void add_message(const char* message) {
 }
 
 static void read_messages(void) {
-  unsigned int i;
+  size_t i;
 
   state.messages = 0;
   state.num_messages = 0;
@@ -165,8 +165,8 @@ static void read_messages(void) {
 }
 
 static void randomize_messages(void) {
-  for (unsigned int i = BOGUS; i < (state.num_messages - 1); i++) {
-    unsigned int j = i + (random() % (state.num_messages - i));
+  for (size_t i = BOGUS; i < (state.num_messages - 1); i++) {
+    size_t j = i + (random() % (state.num_messages - i));
     if (i != j) {
       char* temp = state.messages[i];
       state.messages[i] = state.messages[j];
@@ -218,8 +218,8 @@ static void finish(int sig) {
   exit(sig);
 }
 
-static void init(unsigned int item_count) {
-  unsigned int i, j;
+static void init(size_t item_count) {
+  size_t i, j;
 
   state.items = calloc(BOGUS + item_count, sizeof(screen_object));
 
@@ -603,7 +603,7 @@ static void main_loop(void) {
 
 int main(int count, char** arguments) {
   int seed = time(0);
-  int item_count = DEFAULT_NUM_BOGUS;
+  size_t item_count = DEFAULT_NUM_BOGUS;
 
   while (true) {
     int option = getopt(count, arguments, "n:s:Vh");
@@ -612,13 +612,15 @@ int main(int count, char** arguments) {
     }
 
     switch (option) {
-      case 'n':
-        item_count = atoi(optarg);
-        if (item_count <= 0) {
+      case 'n': {
+        int i = atoi(optarg);
+        if (i <= 0) {
           (void)fprintf(stderr, "Argument must be positive.\n");
           exit(EXIT_FAILURE);
         }
+        item_count = i;
         break;
+      }
       case 's':
         seed = atoi(optarg);
         break;
@@ -639,10 +641,10 @@ int main(int count, char** arguments) {
   assert(state.num_messages > 0);
   randomize_messages();
 
-  if (item_count > (int)state.num_messages) {
+  if (item_count > state.num_messages) {
     item_count = state.num_messages;
   }
-  init((unsigned int)item_count);
+  init(item_count);
 
   instructions();
   draw_screen();
