@@ -19,7 +19,6 @@
 
 #include <assert.h>
 #include <dirent.h>
-#include <fcntl.h>
 #include <getopt.h>
 #include <ncurses.h>
 #include <signal.h>
@@ -33,7 +32,6 @@
 #include "messages.h"
 
 static const char Version[] = "2.71828182";
-
 static const char Introduction[] =
 "By the illustrious Leonard Richardson (C) 1997, 2000.\n"
 "Written originally for the Nerth Pork robotfindskitten contest.\n"
@@ -48,6 +46,7 @@ static const char Introduction[] =
 "the vi and Nethack movement keys, or the number keypad.\n"
 "\n"
 "Press any key to start.\n";
+static const char WinMessage[] = "You found kitten! Way to go, robot!";
 
 static const size_t DefaultItemCount = 20;
 
@@ -90,14 +89,9 @@ typedef enum {
   Key_QUIT = 'Q',
 } KeyCode;
 
-// Size of header area above frame and playing field.
 static const int HeaderSize = 2;
 static const int FrameThickness = 1;
-
-// Index of white color pair.
 static const unsigned int White = 7;
-
-static const char WinMessage[] = "You found kitten! Way to go, robot!";
 
 typedef struct {
   int x;
@@ -191,9 +185,9 @@ static TouchTestResult touch_test(int y, int x, size_t* item_number) {
   return 0;
 }
 
-static void finish(int sig) {
+static void finish(int signal) {
   endwin();
-  exit(sig);
+  exit(signal);
 }
 
 static void initialize(size_t item_count) {
@@ -549,7 +543,7 @@ static void main_loop(void) {
         break;
       case TouchTestResultKitten:
         play_animation(fromright);
-        finish(0);
+        finish(EXIT_SUCCESS);
         break;
       case TouchTestResultNonKitten:
         message(GameState.messages[item_number]);
@@ -603,5 +597,4 @@ int main(int count, char* arguments[]) {
   redraw_screen();
   main_loop();
   finish(EXIT_SUCCESS);
-  return EXIT_SUCCESS;
 }
