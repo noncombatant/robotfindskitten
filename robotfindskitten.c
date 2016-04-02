@@ -345,12 +345,12 @@ static void finish(int sig) {
   exit(sig);
 }
 
-static void init(unsigned int num) {
+static void init(unsigned int item_count) {
   unsigned int i, j;
 
   /*@-mustfreefresh -mustfreeonly@*/
   /* allocate memory */
-  if (!(state.items = calloc((size_t)num + BOGUS, sizeof(screen_object)))) {
+  if (!(state.items = calloc(BOGUS + item_count, sizeof(screen_object)))) {
     fprintf(stderr, "Cannot malloc.\n");
     exit(EXIT_FAILURE);
   }
@@ -369,7 +369,7 @@ static void init(unsigned int num) {
 
   state.lines = LINES;
   state.cols = COLS;
-  if (((state.lines - HEADSIZE - FRAME) * state.cols) < (int)(num + 2)) {
+  if (((state.lines - HEADSIZE - FRAME) * state.cols) < (int)(item_count + 2)) {
     (void)endwin();
     (void)fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
@@ -392,7 +392,7 @@ static void init(unsigned int num) {
   } while (object_equal(state.items[ROBOT], state.items[KITTEN]));
 
   /* set up items */
-  for (i = BOGUS; i < BOGUS + num; i++) {
+  for (i = BOGUS; i < BOGUS + item_count; i++) {
     state.items[i].character = (chtype)randchar();
     state.items[i].bold = randbold();
     state.items[i].reverse = false;
@@ -411,7 +411,7 @@ static void init(unsigned int num) {
         break;
     }
   }
-  state.num_items = BOGUS + num;
+  state.num_items = BOGUS + item_count;
 
   /* set up colors */
   (void)start_color();
