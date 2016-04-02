@@ -12,3 +12,6 @@ there's an official URL, but it's only a Google search away.
 Nick Moffitt (nick@zork.net) and George Moffitt (zen@zork.net)
 refactored the code and added new key commands as well as non-kitten
 messages.
+
+Chris Palmer (https://noncombatant.org) significantl rewrote it to be
+simpler and to not require GNU Autotools.
