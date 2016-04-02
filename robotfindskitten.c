@@ -169,8 +169,10 @@ static void randomize_messages(void) {
 #define randy() \
   (HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2)))
 #define randbold() ((random() % 2) ? true : false)
-#define randcolor() (random() % 6 + 1)
-#define randint(m, n) ((m) + (random() % ((n) + 1)))
+
+static unsigned int random_color(void) {
+  return random() % 6 + 1;
+}
 
 static chtype random_character(void) {
   chtype c;
@@ -281,9 +283,9 @@ static void initialize(size_t item_count) {
     (void)bkgd((chtype)COLOR_PAIR(WHITE));
 
     state.items[ROBOT].color = WHITE;
-    state.items[KITTEN].color = randcolor();
+    state.items[KITTEN].color = random_color();
     for (i = BOGUS; i < state.num_items; i++) {
-      state.items[i].color = randcolor();
+      state.items[i].color = random_color();
     }
   } else {
     state.options &= ~OPTION_HAS_COLOR;
