@@ -91,8 +91,6 @@
 #define EMACS_BACKWARD CTRL('B')
 #define EMACS_FORWARD CTRL('F')
 
-/* allocate message readin buffer in chunks of this size */
-#define MSG_ALLOC_CHUNK 80
 /* allocate the messages array in chunks of this size */
 #define MSGS_ALLOC_CHUNK 32
 
@@ -138,27 +136,16 @@ typedef struct {
 
 static game_state state;
 
-static void add_message(char* msg, size_t len) {
-  char *buff, **nmess;
-
+static void add_message(const char* message) {
   if (state.num_messages_alloc <= state.num_messages) {
-    nmess =
-        calloc((size_t)state.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
-    if (nmess) {
-      state.num_messages_alloc = state.num_messages + MSGS_ALLOC_CHUNK;
-      (void)memcpy(nmess, state.messages, (state.num_messages * sizeof(char*)));
-      (void)free(state.messages);
-      state.messages = nmess;
-    } else {
-      return; /* fail silently */
-    }
+    char** nmess = calloc(state.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
+    state.num_messages_alloc = state.num_messages + MSGS_ALLOC_CHUNK;
+    memcpy(nmess, state.messages, state.num_messages * sizeof(char*));
+    free(state.messages);
+    state.messages = nmess;
   }
-
-  if ((buff = malloc(len))) {
-    (void)strcpy(buff, msg);
-    state.messages[state.num_messages] = buff;
-    state.num_messages++;
-  }
+  state.messages[state.num_messages] = strdup(message);
+  state.num_messages++;
 }
 
 static void read_messages(void) {
@@ -168,11 +155,12 @@ static void read_messages(void) {
   state.num_messages = 0;
   state.num_messages_alloc = 0;
 
-  for (i = 0; i < BOGUS; i++)
-    add_message("", 1);
+  for (i = 0; i < BOGUS; ++i) {
+    add_message("");
+  }
 
   for (i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
-    add_message(Messages[i], strlen(Messages[i]) + 1);
+    add_message(Messages[i]);
   }
 }
 
