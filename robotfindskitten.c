@@ -37,11 +37,7 @@
 
 #include "messages.h"
 
-#define SYSTEM_NKI_DIR "/usr/share/games/robotfindskitten"
-#define USER_NKI_DIR ".robotfindskitten"
 #define PACKAGE_VERSION "1"
-
-#define NKI_EXT "nki"
 
 #define DEFAULT_NUM_BOGUS 20
 
@@ -84,15 +80,12 @@
 #define NUMLOCK_DOWN '2'
 #define NUMLOCK_DR '3'
 
-/* EMACS keycodes */
+/* Emacs keycodes */
 #define CTRL(key) ((key)&0x1f)
 #define EMACS_NEXT CTRL('N')
 #define EMACS_PREVIOUS CTRL('P')
 #define EMACS_BACKWARD CTRL('B')
 #define EMACS_FORWARD CTRL('F')
-
-/* allocate the messages array in chunks of this size */
-#define MSGS_ALLOC_CHUNK 32
 
 /* miscellaneous
  * I'm paranoid about collisions with curses in the KEY_ namespace */
@@ -137,6 +130,7 @@ typedef struct {
 static game_state state;
 
 static void add_message(const char* message) {
+  static const size_t MSGS_ALLOC_CHUNK = 32;
   if (state.num_messages_alloc <= state.num_messages) {
     char** nmess = calloc(state.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
     state.num_messages_alloc = state.num_messages + MSGS_ALLOC_CHUNK;
