@@ -91,14 +91,12 @@
 #define MYKEY_q 'q'
 #define MYKEY_Q 'Q'
 
-/* size of header area above frame and playing field */
-#define HEADSIZE 2
+/* Size of header area above frame and playing field. */
+static const int HeaderSize = 2;
+static const int FrameThickness = 1;
 
-/* thickness of frame - can be 1 or 0, 0 suppreses framing */
-#define FRAME 1
-
-/* magic index of white color pair */
-#define WHITE 7
+/* Index of white color pair. */
+static const unsigned int White = 7;
 
 /* special indices in the items array */
 #define ROBOT 0
@@ -165,11 +163,12 @@ static void randomize_messages(void) {
 }
 
 static int random_x(void) {
-  return FRAME + (random() % (state.cols - FRAME * 2));
+  return FrameThickness + (random() % (state.cols - FrameThickness * 2));
 }
 
 static int random_y() {
-  return HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2));
+  return HeaderSize + FrameThickness +
+         (random() % (state.lines - HeaderSize - FrameThickness * 2));
 }
 
 static bool random_bold(void) {
@@ -229,7 +228,8 @@ static void initialize(size_t item_count) {
 
   state.lines = LINES;
   state.cols = COLS;
-  if (((state.lines - HEADSIZE - FRAME) * state.cols) < (int)(item_count + 2)) {
+  if (((state.lines - HeaderSize - FrameThickness) * state.cols) <
+      (int)(item_count + 2)) {
     (void)endwin();
     (void)fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
@@ -283,9 +283,9 @@ static void initialize(size_t item_count) {
     (void)init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
     (void)init_pair(6, COLOR_CYAN, COLOR_BLACK);
     (void)init_pair(7, COLOR_WHITE, COLOR_BLACK);
-    (void)bkgd((chtype)COLOR_PAIR(WHITE));
+    (void)bkgd((chtype)COLOR_PAIR(White));
 
-    state.items[ROBOT].color = WHITE;
+    state.items[ROBOT].color = White;
     state.items[KITTEN].color = random_color();
     for (size_t i = BOGUS; i < state.num_items; i++) {
       state.items[i].color = random_color();
@@ -314,7 +314,7 @@ static void message(const char* message) {
   int y, x;
   getyx(curscr, y, x);
   if ((state.options & OPTION_HAS_COLOR) != 0) {
-    attrset(COLOR_PAIR(WHITE));
+    attrset(COLOR_PAIR(White));
   }
   (void)move(1, 0);
   (void)clrtoeol();
@@ -325,38 +325,32 @@ static void message(const char* message) {
 }
 
 static void draw_screen() {
-  unsigned int i;
-
-  if ((state.options & OPTION_HAS_COLOR) != 0)
-    attrset(COLOR_PAIR(WHITE));
+  if ((state.options & OPTION_HAS_COLOR) != 0) {
+    attrset(COLOR_PAIR(White));
+  }
   (void)clear();
-#if FRAME > 0
-  (void)mvaddch(HEADSIZE, 0, ACS_ULCORNER);
-  (void)mvaddch(HEADSIZE, COLS - 1, ACS_URCORNER);
+  (void)mvaddch(HeaderSize, 0, ACS_ULCORNER);
+  (void)mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
   (void)mvaddch(LINES - 1, 0, ACS_LLCORNER);
   (void)mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
-  for (i = 1; i < (unsigned int)COLS - 1; i++) {
-    (void)mvaddch(HEADSIZE, (int)i, ACS_HLINE);
+  for (unsigned int i = 1; i < (unsigned int)COLS - 1; i++) {
+    (void)mvaddch(HeaderSize, (int)i, ACS_HLINE);
     (void)mvaddch(LINES - 1, (int)i, ACS_HLINE);
   }
-  for (i = FRAME + HEADSIZE; i < (unsigned int)LINES - 1; i++) {
+  for (unsigned int i = FrameThickness + HeaderSize;
+       i < (unsigned int)LINES - 1; i++) {
     (void)mvaddch((int)i, 0, ACS_VLINE);
     (void)mvaddch((int)i, COLS - 1, ACS_VLINE);
   }
-#else
-  for (i = 0; i < COLS; i++) {
-    (void)mvaddch(HEADSIZE, (int)i, ACS_HLINE);
-  }
-#endif
   (void)move(0, 0);
   (void)printw("robotfindskitten %s\n\n", PACKAGE_VERSION);
-  for (i = 0; i < state.num_items; i++) {
+  for (size_t i = 0; i < state.num_items; i++) {
     (void)move(state.items[i].y, state.items[i].x);
     draw(&state.items[i]);
   }
   (void)move(state.items[ROBOT].y, state.items[ROBOT].x);
   if ((state.options & OPTION_HAS_COLOR) != 0)
-    (void)attrset(COLOR_PAIR(WHITE));
+    (void)attrset(COLOR_PAIR(White));
   (void)refresh();
 }
 
@@ -371,7 +365,8 @@ static void handle_resize(void) {
   }
 
   /* has the resize hidden any items? */
-  if (xbound >= COLS - FRAME * 2 || ybound >= HEADSIZE + LINES - FRAME * 2) {
+  if (xbound >= COLS - FrameThickness * 2 ||
+      ybound >= HeaderSize + LINES - FrameThickness * 2) {
     (void)endwin();
     (void)fprintf(stderr,
                   "You crushed the simulation. And robot. And kitten.\n");
@@ -556,9 +551,11 @@ static void main_loop(void) {
     }
 
     /* it's the edge of the world as we know it... */
-    if ((y < HEADSIZE + FRAME) || (y >= state.lines - FRAME) || (x < FRAME) ||
-        (x >= state.cols - FRAME))
+    if ((y < HeaderSize + FrameThickness) ||
+        (y >= state.lines - FrameThickness) || (x < FrameThickness) ||
+        (x >= state.cols - FrameThickness)) {
       continue;
+    }
 
     /* let's see where we've landed */
     switch (test(y, x, &bnum)) {
