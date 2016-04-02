@@ -288,7 +288,7 @@ static void draw(const screen_object* o) {
   addch(o->character);
 }
 
-static void message(const char* message) {
+static void show_message(const char* message) {
   int y, x;
   getyx(curscr, y, x);
   if (GameState.screen_has_color) {
@@ -370,7 +370,7 @@ static void show_introduction(void) {
   clear();
 }
 
-static void play_animation(bool fromright) {
+static void play_animation(bool approach_from_right) {
   int i, animation_meet;
   screen_object robot;
   screen_object kitten;
@@ -398,7 +398,7 @@ static void play_animation(bool fromright) {
     GameState.items[Kitten].character = kitty;
     GameState.items[Robot].y = 1;
     GameState.items[Kitten].y = 1;
-    if (fromright) {
+    if (approach_from_right) {
       GameState.items[Robot].x = animation_meet + i;
       GameState.items[Kitten].x = animation_meet - i + 1;
     } else {
@@ -419,7 +419,7 @@ static void play_animation(bool fromright) {
     refresh();
     sleep(1);
   }
-  message(WinMessage);
+  show_message(WinMessage);
   curs_set(0);
   sleep(1);
 }
@@ -427,7 +427,7 @@ static void play_animation(bool fromright) {
 static void main_loop(void) {
   int x, y;
   size_t item_number = 0;
-  bool fromright = false;
+  bool approach_from_right = false;
 
   while (true) {
     int ch = getch();
@@ -444,16 +444,16 @@ static void main_loop(void) {
       case KEY_HOME:
         --y;
         --x;
-        fromright = true;
+        approach_from_right = true;
         break;
       case Emacs_PREVIOUS:
       case NetHack_UP:
       case NetHack_up:
       case NumLock_UP:
       case KEY_UP:
-        // fromright: special case
+        // approach_from_right: special case
         --y;
-        fromright = true;
+        approach_from_right = true;
         break;
       case NetHack_UP_RIGHT:
       case NetHack_up_right:
@@ -469,7 +469,7 @@ static void main_loop(void) {
       case NumLock_LEFT:
       case KEY_LEFT:
         --x;
-        fromright = true;
+        approach_from_right = true;
         break;
       case Emacs_FORWARD:
       case NetHack_RIGHT:
@@ -477,7 +477,7 @@ static void main_loop(void) {
       case NumLock_RIGHT:
       case KEY_RIGHT:
         ++x;
-        fromright = false;
+        approach_from_right = false;
         break;
       case NetHack_DOWN_LEFT:
       case NetHack_down_left:
@@ -486,7 +486,7 @@ static void main_loop(void) {
       case KEY_END:
         ++y;
         --x;
-        fromright = true;
+        approach_from_right = true;
         break;
       case Emacs_NEXT:
       case NetHack_DOWN:
@@ -514,7 +514,7 @@ static void main_loop(void) {
         handle_resize();
         break;
       default:
-        message("Invalid input: Use direction keys or q.");
+        show_message("Invalid input: Use direction keys or q.");
         break;
     }
 
@@ -543,14 +543,14 @@ static void main_loop(void) {
         // Nothing happened.
         break;
       case TouchTestResultKitten:
-        play_animation(fromright);
+        play_animation(approach_from_right);
         finish(EXIT_SUCCESS);
         break;
       case TouchTestResultNonKitten:
-        message(GameState.messages[item_number]);
+        show_message(GameState.messages[item_number]);
         break;
       default:
-        message("Well, that was unexpected...");
+        show_message("Well, that was unexpected...");
         break;
     }
   }
