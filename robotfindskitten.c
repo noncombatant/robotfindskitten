@@ -221,12 +221,8 @@ static void finish(int sig) {
 static void init(unsigned int item_count) {
   unsigned int i, j;
 
-  if (!(state.items = calloc(BOGUS + item_count, sizeof(screen_object)))) {
-    fprintf(stderr, "Cannot malloc.\n");
-    exit(EXIT_FAILURE);
-  }
+  state.items = calloc(BOGUS + item_count, sizeof(screen_object));
 
-  /* install exit handler */
   (void)signal(SIGINT, finish);
 
   /* set up (n)curses */
