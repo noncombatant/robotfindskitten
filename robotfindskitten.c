@@ -31,18 +31,12 @@
 #include <sys/stat.h>
 #include <getopt.h>
 #include <assert.h>
-#include "config.h"
 
-#ifdef HAVE_NCURSES_H
 #include <ncurses.h>
-#elif defined ( HAVE_CURSES_H )
-#include <curses.h>
-#else
-#error "No (n)curses headers found, aborting"
-#endif
 
-/* #define SYSTEM_NKI_DIR "/usr/share/games/robotfindskitten" */
+#define SYSTEM_NKI_DIR "/usr/share/games/robotfindskitten"
 #define USER_NKI_DIR ".robotfindskitten"
+#define PACKAGE_VERSION "1"
 
 #define NKI_EXT		"nki"
 
