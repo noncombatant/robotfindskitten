@@ -215,8 +215,6 @@ static void finish(int sig) {
 }
 
 static void initialize(size_t item_count) {
-  size_t i, j;
-
   state.items = calloc(BOGUS + item_count, sizeof(screen_object));
 
   (void)signal(SIGINT, finish);
@@ -237,14 +235,12 @@ static void initialize(size_t item_count) {
     exit(EXIT_FAILURE);
   }
 
-  /* set up robot */
   state.items[ROBOT].character = (chtype)'#';
   state.items[ROBOT].bold = false; /* we are a timid robot */
   state.items[ROBOT].reverse = false;
   state.items[ROBOT].y = random_y();
   state.items[ROBOT].x = random_x();
 
-  /* set up kitten */
   state.items[KITTEN].character = random_character();
   state.items[KITTEN].bold = random_bold();
   state.items[KITTEN].reverse = false;
@@ -253,8 +249,7 @@ static void initialize(size_t item_count) {
     state.items[KITTEN].x = random_x();
   } while (object_equal(state.items[ROBOT], state.items[KITTEN]));
 
-  /* set up items */
-  for (i = BOGUS; i < BOGUS + item_count; i++) {
+  for (size_t i = BOGUS; i < BOGUS + item_count; i++) {
     state.items[i].character = random_character();
     state.items[i].bold = random_bold();
     state.items[i].reverse = false;
@@ -265,17 +260,19 @@ static void initialize(size_t item_count) {
         continue;
       if (object_equal(state.items[KITTEN], state.items[i]))
         continue;
+      size_t j;
       for (j = 0; j < i; j++) {
-        if (object_equal(state.items[j], state.items[i]))
+        if (object_equal(state.items[j], state.items[i])) {
           break;
+        }
       }
-      if (j == i)
+      if (j == i) {
         break;
+      }
     }
   }
   state.num_items = BOGUS + item_count;
 
-  /* set up colors */
   (void)start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
     state.options |= OPTION_HAS_COLOR;
@@ -290,7 +287,7 @@ static void initialize(size_t item_count) {
 
     state.items[ROBOT].color = WHITE;
     state.items[KITTEN].color = random_color();
-    for (i = BOGUS; i < state.num_items; i++) {
+    for (size_t i = BOGUS; i < state.num_items; i++) {
       state.items[i].color = random_color();
     }
   } else {
@@ -299,11 +296,9 @@ static void initialize(size_t item_count) {
 }
 
 static void draw(const screen_object* o) {
-  attr_t new;
-
   assert(curscr != NULL);
   if ((state.options & OPTION_HAS_COLOR) != 0) {
-    new = COLOR_PAIR(o->color);
+    attr_t new = COLOR_PAIR(o->color);
     if (o->bold) {
       new |= A_BOLD;
     }
