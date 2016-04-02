@@ -1,7 +1,7 @@
 CFLAGS = -Wall -Wextra -Werror -O0
 LDFLAGS = -lncurses
 
-robotfindskitten:
+robotfindskitten: robotfindskitten.c
 
 play: robotfindskitten
 	-./robotfindskitten
