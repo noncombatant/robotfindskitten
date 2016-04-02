@@ -1,4 +1,4 @@
-// Copyright (C) 2004-2005 Alexey Toptygin <alexeyt@freeshell.org> Based on
+// Copyright © 2004-2005 Alexey Toptygin <alexeyt@freeshell.org> Based on
 // sources by Leonard Richardson and others.
 //
 // Refactored (...defactored?) by Chris Palmer <https://noncombatant.org> on 1
@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <getopt.h>
+#include <locale.h>
 #include <ncurses.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -33,7 +34,7 @@
 
 static const char Version[] = "2.71828182";
 static const char Introduction[] =
-"By the illustrious Leonard Richardson (C) 1997, 2000.\n"
+"By the illustrious Leonard Richardson © 1997, 2000.\n"
 "Written originally for the Nerth Pork robotfindskitten contest.\n"
 "\n"
 "In this game, you are robot (#). Your job is to find kitten. This task\n"
@@ -556,6 +557,12 @@ static void main_loop(void) {
 }
 
 int main(int count, char* arguments[]) {
+#if defined(__APPLE__) && defined(__MACH__)
+  setlocale(LC_ALL, "");
+#else
+  setlocale(LC_ALL, NULL);
+#endif
+
   int seed = time(0);
   size_t item_count = DefaultItemCount;
   bool options_present = false;
