@@ -29,9 +29,8 @@ Debian-based systems, run `sudo apt-get install build-essential`. That should
 do the trick.
 
 robotfindskitten will not compile properly unless the ncurses headers are
-installed. They are installed by default on Mac OS X, and you can install them
-on Ubuntu or other Debian-based systems with the command `apt-get install
-libncurses-dev`.
+installed. They come with Xcode on Mac OS X, and you can install them on Ubuntu
+or other Debian-based systems with the command `apt-get install libncurses-dev`.
 
 To compile, make sure you have the ncurses libraries installed, and simply
 type `make`. To run, type `./robotfindskitten`.
