@@ -122,10 +122,11 @@ static const size_t Kitten = 1;
 static const size_t Bogus = 2;
 
 static void add_message(const char* message) {
-  static const size_t MSGS_ALLOC_CHUNK = 32;
+  static const size_t AllocationGrowth = 32;
   if (GameState.message_count_alloc <= GameState.message_count) {
-    char** nmess = calloc(GameState.message_count + MSGS_ALLOC_CHUNK, sizeof(char*));
-    GameState.message_count_alloc = GameState.message_count + MSGS_ALLOC_CHUNK;
+    char** nmess =
+        calloc(GameState.message_count + AllocationGrowth, sizeof(char*));
+    GameState.message_count_alloc = GameState.message_count + AllocationGrowth;
     memcpy(nmess, GameState.messages, GameState.message_count * sizeof(char*));
     free(GameState.messages);
     GameState.messages = nmess;
@@ -621,7 +622,8 @@ int main(int count, char** arguments) {
   assert(GameState.message_count > 0);
   randomize_messages();
 
-  initialize(item_count <= GameState.message_count ? item_count : GameState.message_count);
+  initialize(item_count <= GameState.message_count ? item_count
+                                                   : GameState.message_count);
 
   instructions();
   draw_screen();
