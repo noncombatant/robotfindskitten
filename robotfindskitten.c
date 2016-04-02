@@ -107,7 +107,7 @@ typedef struct {
 
 static struct {
   int lines;
-  int cols;
+  int columns;
   unsigned int options;
   size_t item_count;
   size_t message_count;
@@ -158,7 +158,7 @@ static void randomize_messages(void) {
 }
 
 static int random_x(void) {
-  return FrameThickness + (random() % (GameState.cols - FrameThickness * 2));
+  return FrameThickness + (random() % (GameState.columns - FrameThickness * 2));
 }
 
 static int random_y() {
@@ -221,8 +221,8 @@ static void initialize(size_t item_count) {
   (void)keypad(stdscr, true);
 
   GameState.lines = LINES;
-  GameState.cols = COLS;
-  if (((GameState.lines - HeaderSize - FrameThickness) * GameState.cols) <
+  GameState.columns = COLS;
+  if (((GameState.lines - HeaderSize - FrameThickness) * GameState.columns) <
       (int)(item_count + 2)) {
     (void)endwin();
     (void)fprintf(stderr, "Screen too small to fit all objects!\n");
@@ -313,7 +313,7 @@ static void message(const char* message) {
   (void)move(1, 0);
   (void)clrtoeol();
   (void)move(1, 0);
-  (void)printw("%.*s", GameState.cols, message);
+  (void)printw("%.*s", GameState.columns, message);
   (void)move(y, x);
   (void)refresh();
 }
@@ -368,7 +368,7 @@ static void handle_resize(void) {
   }
 
   GameState.lines = LINES;
-  GameState.cols = COLS;
+  GameState.columns = COLS;
   draw_screen();
 }
 
@@ -547,7 +547,7 @@ static void main_loop(void) {
     /* it's the edge of the world as we know it... */
     if ((y < HeaderSize + FrameThickness) ||
         (y >= GameState.lines - FrameThickness) || (x < FrameThickness) ||
-        (x >= GameState.cols - FrameThickness)) {
+        (x >= GameState.columns - FrameThickness)) {
       continue;
     }
 
