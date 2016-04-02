@@ -603,7 +603,7 @@ static void main_loop(void) {
 
 int main(int count, char** arguments) {
   int seed = time(0);
-  int nbogus = DEFAULT_NUM_BOGUS;
+  int item_count = DEFAULT_NUM_BOGUS;
 
   while (true) {
     int option = getopt(count, arguments, "n:s:Vh");
@@ -613,8 +613,8 @@ int main(int count, char** arguments) {
 
     switch (option) {
       case 'n':
-        nbogus = atoi(optarg);
-        if (nbogus <= 0) {
+        item_count = atoi(optarg);
+        if (item_count <= 0) {
           (void)fprintf(stderr, "Argument must be positive.\n");
           exit(EXIT_FAILURE);
         }
@@ -644,14 +644,10 @@ int main(int count, char** arguments) {
 
   randomize_messages();
 
-  if (nbogus > (int)state.num_messages) {
-    (void)fprintf(stderr,
-                  "There are only %u NKIs available (user requested %d).\n",
-                  state.num_messages, nbogus);
-    exit(EXIT_FAILURE);
-  } else {
-    init((unsigned int)nbogus);
+  if (item_count > (int)state.num_messages) {
+    item_count = state.num_messages;
   }
+  init((unsigned int)item_count);
 
   instructions();
   draw_screen();
