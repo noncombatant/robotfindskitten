@@ -101,7 +101,7 @@ typedef struct {
   bool bold;
   bool reverse;
   chtype character;
-} screen_object;
+} ScreenObject;
 
 static struct {
   int lines;
@@ -109,7 +109,7 @@ static struct {
   bool screen_has_color;
   size_t item_count;
   size_t message_count;
-  screen_object items[MessageCount];
+  ScreenObject items[MessageCount];
   char** messages;
 } GameState;
 
@@ -118,7 +118,7 @@ static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
 
-static void initialize_messages(void) {
+static void InitializeMessages(void) {
   GameState.messages = Messages;
   GameState.message_count = MessageCount;
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
@@ -134,24 +134,24 @@ static void initialize_messages(void) {
   assert(0 == strcmp("", GameState.messages[Kitten]));
 }
 
-static int random_x(void) {
+static int RandomX(void) {
   return FrameThickness + (random() % (GameState.columns - FrameThickness * 2));
 }
 
-static int random_y() {
+static int RandomY() {
   return HeaderSize + FrameThickness +
          (random() % (GameState.lines - HeaderSize - FrameThickness * 2));
 }
 
-static bool random_bold(void) {
+static bool RandomBold(void) {
   return random() % 2 ? true : false;
 }
 
-static unsigned int random_color(void) {
+static unsigned int RandomColor(void) {
   return random() % 6 + 1;
 }
 
-static chtype random_character(void) {
+static chtype RandomCharacter(void) {
   chtype c;
   do {
     c = (random() % ('~' - '!' + 1) + '!');
@@ -159,7 +159,7 @@ static chtype random_character(void) {
   return c;
 }
 
-static bool object_equal(const screen_object a, const screen_object b) {
+static bool ScreenObjectEqual(const ScreenObject a, const ScreenObject b) {
   return a.x == b.x && a.y == b.y;
 }
 
@@ -170,7 +170,7 @@ typedef enum {
   TouchTestResultNonKitten,
 } TouchTestResult;
 
-static TouchTestResult touch_test(int y, int x, size_t* item_number) {
+static TouchTestResult TouchTest(int y, int x, size_t* item_number) {
   for (size_t i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x == x && GameState.items[i].y == y) {
       *item_number = i;
@@ -186,17 +186,17 @@ static TouchTestResult touch_test(int y, int x, size_t* item_number) {
   return 0;
 }
 
-static void finish(int signal) {
+static void Finish(int signal) {
   endwin();
   exit(signal);
 }
 
-static void initialize(size_t item_count) {
-  initialize_messages();
+static void InitializeGame(size_t item_count) {
+  InitializeMessages();
   item_count = GameState.message_count ? item_count : GameState.message_count;
   GameState.item_count = Bogus + item_count;
 
-  signal(SIGINT, finish);
+  signal(SIGINT, Finish);
 
   // Set up (n)curses.
   initscr();
@@ -218,31 +218,31 @@ static void initialize(size_t item_count) {
   GameState.items[Robot].character = (chtype)'#';
   GameState.items[Robot].bold = false;    // We are a timid robot.
   GameState.items[Robot].reverse = false;
-  GameState.items[Robot].y = random_y();
-  GameState.items[Robot].x = random_x();
+  GameState.items[Robot].y = RandomY();
+  GameState.items[Robot].x = RandomX();
 
-  GameState.items[Kitten].character = random_character();
-  GameState.items[Kitten].bold = random_bold();
+  GameState.items[Kitten].character = RandomCharacter();
+  GameState.items[Kitten].bold = RandomBold();
   GameState.items[Kitten].reverse = false;
   do {
-    GameState.items[Kitten].y = random_y();
-    GameState.items[Kitten].x = random_x();
-  } while (object_equal(GameState.items[Robot], GameState.items[Kitten]));
+    GameState.items[Kitten].y = RandomY();
+    GameState.items[Kitten].x = RandomX();
+  } while (ScreenObjectEqual(GameState.items[Robot], GameState.items[Kitten]));
 
   for (size_t i = Bogus; i < GameState.item_count; ++i) {
-    GameState.items[i].character = random_character();
-    GameState.items[i].bold = random_bold();
+    GameState.items[i].character = RandomCharacter();
+    GameState.items[i].bold = RandomBold();
     GameState.items[i].reverse = false;
     while (true) {
-      GameState.items[i].y = random_y();
-      GameState.items[i].x = random_x();
-      if (object_equal(GameState.items[Robot], GameState.items[i]))
+      GameState.items[i].y = RandomY();
+      GameState.items[i].x = RandomX();
+      if (ScreenObjectEqual(GameState.items[Robot], GameState.items[i]))
         continue;
-      if (object_equal(GameState.items[Kitten], GameState.items[i]))
+      if (ScreenObjectEqual(GameState.items[Kitten], GameState.items[i]))
         continue;
       size_t j;
       for (j = 0; j < i; ++j) {
-        if (object_equal(GameState.items[j], GameState.items[i])) {
+        if (ScreenObjectEqual(GameState.items[j], GameState.items[i])) {
           break;
         }
       }
@@ -266,14 +266,14 @@ static void initialize(size_t item_count) {
     bkgd((chtype)COLOR_PAIR(White));
 
     GameState.items[Robot].color = White;
-    GameState.items[Kitten].color = random_color();
+    GameState.items[Kitten].color = RandomColor();
     for (size_t i = Bogus; i < GameState.item_count; ++i) {
-      GameState.items[i].color = random_color();
+      GameState.items[i].color = RandomColor();
     }
   }
 }
 
-static void draw(const screen_object* o) {
+static void Draw(const ScreenObject* o) {
   assert(curscr != NULL);
   if (GameState.screen_has_color) {
     attr_t new = COLOR_PAIR(o->color);
@@ -288,7 +288,7 @@ static void draw(const screen_object* o) {
   addch(o->character);
 }
 
-static void show_message(const char* message) {
+static void ShowMessage(const char* message) {
   int y, x;
   getyx(curscr, y, x);
   if (GameState.screen_has_color) {
@@ -302,7 +302,7 @@ static void show_message(const char* message) {
   refresh();
 }
 
-static void redraw_screen() {
+static void RedrawScreen() {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
@@ -324,7 +324,7 @@ static void redraw_screen() {
   printw("robotfindskitten %s\n\n", Version);
   for (size_t i = 0; i < GameState.item_count; ++i) {
     move(GameState.items[i].y, GameState.items[i].x);
-    draw(&GameState.items[i]);
+    Draw(&GameState.items[i]);
   }
   move(GameState.items[Robot].y, GameState.items[Robot].x);
   if (GameState.screen_has_color) {
@@ -333,7 +333,7 @@ static void redraw_screen() {
   refresh();
 }
 
-static void handle_resize(void) {
+static void HandleResize(void) {
   int xbound = 0, ybound = 0;
   unsigned int i;
   for (i = 0; i < GameState.item_count; ++i) {
@@ -355,25 +355,25 @@ static void handle_resize(void) {
 
   GameState.lines = LINES;
   GameState.columns = COLS;
-  redraw_screen();
+  RedrawScreen();
 }
 
-static void show_introduction(void) {
+static void ShowIntroduction(void) {
   clear();
   move(0, 0);
   printw("robotfindskitten %s\n", Version);
   printw(Introduction);
   refresh();
   if (getch() == KEY_RESIZE) {
-    handle_resize();
+    HandleResize();
   }
   clear();
 }
 
-static void play_animation(bool approach_from_right) {
+static void PlayAnimation(bool approach_from_right) {
   int i, animation_meet;
-  screen_object robot;
-  screen_object kitten;
+  ScreenObject robot;
+  ScreenObject kitten;
   chtype kitty;
 
   move(1, 0);
@@ -390,9 +390,9 @@ static void play_animation(bool approach_from_right) {
     GameState.items[Kitten].character = (chtype)' ';
 
     move(GameState.items[Robot].y, GameState.items[Robot].x);
-    draw(&GameState.items[Robot]);
+    Draw(&GameState.items[Robot]);
     move(GameState.items[Kitten].y, GameState.items[Kitten].x);
-    draw(&GameState.items[Kitten]);
+    Draw(&GameState.items[Kitten]);
 
     GameState.items[Robot].character = (chtype)'#';
     GameState.items[Kitten].character = kitty;
@@ -407,24 +407,24 @@ static void play_animation(bool approach_from_right) {
     }
 
     move(kitten.y, kitten.x);
-    draw(&kitten);
+    Draw(&kitten);
     move(robot.y, robot.x);
-    draw(&robot);
+    Draw(&robot);
 
     move(GameState.items[Robot].y, GameState.items[Robot].x);
-    draw(&GameState.items[Robot]);
+    Draw(&GameState.items[Robot]);
     move(GameState.items[Kitten].y, GameState.items[Kitten].x);
-    draw(&GameState.items[Kitten]);
+    Draw(&GameState.items[Kitten]);
     move(GameState.items[Robot].y, GameState.items[Robot].x);
     refresh();
     sleep(1);
   }
-  show_message(WinMessage);
+  ShowMessage(WinMessage);
   curs_set(0);
   sleep(1);
 }
 
-static void main_loop(void) {
+static void MainLoop(void) {
   int x, y;
   size_t item_number = 0;
   bool approach_from_right = false;
@@ -505,16 +505,16 @@ static void main_loop(void) {
         break;
       case Key_QUIT:
       case Key_quit:
-        finish(EXIT_FAILURE);
+        Finish(EXIT_FAILURE);
         break;
       case Key_RedrawScreen:
-        redraw_screen();
+        RedrawScreen();
         break;
       case KEY_RESIZE:
-        handle_resize();
+        HandleResize();
         break;
       default:
-        show_message("Invalid input: Use direction keys or q.");
+        ShowMessage("Invalid input: Use direction keys or q.");
         break;
     }
 
@@ -526,16 +526,16 @@ static void main_loop(void) {
     }
 
     // Let's see where we've landed.
-    switch (touch_test(y, x, &item_number)) {
+    switch (TouchTest(y, x, &item_number)) {
       case TouchTestResultNone:
         // Robot moved.
         GameState.items[Robot].character = (chtype)' ';
-        draw(&GameState.items[Robot]);
+        Draw(&GameState.items[Robot]);
         GameState.items[Robot].y = y;
         GameState.items[Robot].x = x;
         GameState.items[Robot].character = (chtype)'#';
         move(y, x);
-        draw(&GameState.items[Robot]);
+        Draw(&GameState.items[Robot]);
         move(y, x);
         refresh();
         break;
@@ -543,14 +543,14 @@ static void main_loop(void) {
         // Nothing happened.
         break;
       case TouchTestResultKitten:
-        play_animation(approach_from_right);
-        finish(EXIT_SUCCESS);
+        PlayAnimation(approach_from_right);
+        Finish(EXIT_SUCCESS);
         break;
       case TouchTestResultNonKitten:
-        show_message(GameState.messages[item_number]);
+        ShowMessage(GameState.messages[item_number]);
         break;
       default:
-        show_message("Well, that was unexpected...");
+        ShowMessage("Well, that was unexpected...");
         break;
     }
   }
@@ -597,11 +597,11 @@ int main(int count, char* arguments[]) {
   }
 
   srandom(seed);
-  initialize(item_count);
+  InitializeGame(item_count);
   if (!options_present) {
-    show_introduction();
+    ShowIntroduction();
   }
-  redraw_screen();
-  main_loop();
-  finish(EXIT_SUCCESS);
+  RedrawScreen();
+  MainLoop();
+  Finish(EXIT_SUCCESS);
 }
