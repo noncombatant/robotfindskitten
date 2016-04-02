@@ -111,7 +111,7 @@ static struct {
   unsigned int options;
   size_t item_count;
   size_t message_count;
-  screen_object* items;
+  screen_object items[MessageCount];
   char** messages;
 } GameState;
 
@@ -190,7 +190,6 @@ static void initialize(size_t item_count) {
   initialize_messages();
   item_count = GameState.message_count ? item_count : GameState.message_count;
   GameState.item_count = Bogus + item_count;
-  GameState.items = calloc(GameState.item_count, sizeof(screen_object));
 
   (void)signal(SIGINT, finish);
 
