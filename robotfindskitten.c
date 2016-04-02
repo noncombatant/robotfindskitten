@@ -313,7 +313,7 @@ static void randomize_messages(void) {
 #define randcolor() (random() % 6 + 1)
 #define randint(m, n) ((m) + (random() % ((n) + 1)))
 
-static inline char randchar(void) {
+static char randchar(void) {
   char ch;
   do {
     ch = randch();
@@ -321,7 +321,7 @@ static inline char randchar(void) {
   return ch;
 }
 
-static inline bool object_equal(const screen_object a, const screen_object b) {
+static bool object_equal(const screen_object a, const screen_object b) {
   return a.x == b.x && a.y == b.y;
 }
 
