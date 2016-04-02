@@ -146,7 +146,7 @@ static void initialize_messages(void) {
 }
 
 static void randomize_messages(void) {
-  for (size_t i = Bogus; i < (GameState.message_count - 1); i++) {
+  for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
     size_t j = i + (random() % (GameState.message_count - i));
     if (i != j) {
       char* temp = GameState.messages[i];
@@ -186,7 +186,7 @@ static bool object_equal(const screen_object a, const screen_object b) {
 }
 
 static size_t test(int y, int x, unsigned int* bnum) {
-  for (size_t i = 0; i < GameState.item_count; i++) {
+  for (size_t i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x == x && GameState.items[i].y == y) {
       *bnum = i;
       if (Robot == i) {
@@ -242,7 +242,7 @@ static void initialize(size_t item_count) {
     GameState.items[Kitten].x = random_x();
   } while (object_equal(GameState.items[Robot], GameState.items[Kitten]));
 
-  for (size_t i = Bogus; i < Bogus + item_count; i++) {
+  for (size_t i = Bogus; i < Bogus + item_count; ++i) {
     GameState.items[i].character = random_character();
     GameState.items[i].bold = random_bold();
     GameState.items[i].reverse = false;
@@ -254,7 +254,7 @@ static void initialize(size_t item_count) {
       if (object_equal(GameState.items[Kitten], GameState.items[i]))
         continue;
       size_t j;
-      for (j = 0; j < i; j++) {
+      for (j = 0; j < i; ++j) {
         if (object_equal(GameState.items[j], GameState.items[i])) {
           break;
         }
@@ -280,7 +280,7 @@ static void initialize(size_t item_count) {
 
     GameState.items[Robot].color = White;
     GameState.items[Kitten].color = random_color();
-    for (size_t i = Bogus; i < GameState.item_count; i++) {
+    for (size_t i = Bogus; i < GameState.item_count; ++i) {
       GameState.items[i].color = random_color();
     }
   } else {
@@ -326,18 +326,18 @@ static void draw_screen() {
   (void)mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
   (void)mvaddch(LINES - 1, 0, ACS_LLCORNER);
   (void)mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
-  for (unsigned int i = 1; i < (unsigned int)COLS - 1; i++) {
+  for (unsigned int i = 1; i < (unsigned int)COLS - 1; ++i) {
     (void)mvaddch(HeaderSize, (int)i, ACS_HLINE);
     (void)mvaddch(LINES - 1, (int)i, ACS_HLINE);
   }
   for (unsigned int i = FrameThickness + HeaderSize;
-       i < (unsigned int)LINES - 1; i++) {
+       i < (unsigned int)LINES - 1; ++i) {
     (void)mvaddch((int)i, 0, ACS_VLINE);
     (void)mvaddch((int)i, COLS - 1, ACS_VLINE);
   }
   (void)move(0, 0);
   (void)printw("robotfindskitten %s\n\n", Version);
-  for (size_t i = 0; i < GameState.item_count; i++) {
+  for (size_t i = 0; i < GameState.item_count; ++i) {
     (void)move(GameState.items[i].y, GameState.items[i].x);
     draw(&GameState.items[i]);
   }
@@ -350,7 +350,7 @@ static void draw_screen() {
 static void handle_resize(void) {
   int xbound = 0, ybound = 0;
   unsigned int i;
-  for (i = 0; i < GameState.item_count; i++) {
+  for (i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x > xbound)
       xbound = GameState.items[i].x;
     if (GameState.items[i].y > ybound)
