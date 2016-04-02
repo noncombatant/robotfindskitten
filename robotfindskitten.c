@@ -1,24 +1,21 @@
-/*
- *  Copyright (C) 2004-2005 Alexey Toptygin <alexeyt@freeshell.org>
- *  Based on sources by Leonard Richardson and others.
- *
- *  Refactored (...defactored?) by Chris Palmer <https://noncombatant.org> on
- *  1 April 2016.
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or EXISTENCE OF KITTEN.  See the GNU General
- *  Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
+// Copyright (C) 2004-2005 Alexey Toptygin <alexeyt@freeshell.org> Based on
+// sources by Leonard Richardson and others.
+//
+// Refactored (...defactored?) by Chris Palmer <https://noncombatant.org> on 1
+// April 2016.
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software
+// Foundation; either version 2 of the License, or (at your option) any later
+// version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// EXISTENCE OF KITTEN. See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with
+// this program; if not, write to the Free Software Foundation, Inc., 59 Temple
+// Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include <assert.h>
 #include <dirent.h>
@@ -54,12 +51,12 @@ static const char Introduction[] =
 
 static const size_t DefaultItemCount = 20;
 
-/* Bits returned from test. */
+// Bits returned from test.
 #define BROBOT 0x01
 #define BKITTEN 0x02
 #define BBOGUS 0x04
 
-/* Nethack keycodes. */
+// Nethack keycodes.
 #define NETHACK_down 'j'
 #define NETHACK_DOWN 'J'
 #define NETHACK_up 'k'
@@ -77,7 +74,7 @@ static const size_t DefaultItemCount = 20;
 #define NETHACK_dr 'n'
 #define NETHACK_DR 'N'
 
-/* When numlock is on, the keypad generates numbers. */
+// When numlock is on, the keypad generates numbers.
 #define NUMLOCK_UL '7'
 #define NUMLOCK_UP '8'
 #define NUMLOCK_UR '9'
@@ -87,24 +84,23 @@ static const size_t DefaultItemCount = 20;
 #define NUMLOCK_DOWN '2'
 #define NUMLOCK_DR '3'
 
-/* Emacs keycodes. */
+// Emacs keycodes.
 #define CTRL(key) ((key)&0x1f)
 #define EMACS_NEXT CTRL('N')
 #define EMACS_PREVIOUS CTRL('P')
 #define EMACS_BACKWARD CTRL('B')
 #define EMACS_FORWARD CTRL('F')
 
-/* miscellaneous
- * I'm paranoid about collisions with curses in the KEY_ namespace */
+// Miscellaneous. I'm paranoid about collisions with curses in the KEY_ namespace
 #define MYKEY_REDRAW CTRL('L')
 #define MYKEY_q 'q'
 #define MYKEY_Q 'Q'
 
-/* Size of header area above frame and playing field. */
+// Size of header area above frame and playing field.
 static const int HeaderSize = 2;
 static const int FrameThickness = 1;
 
-/* Index of white color pair. */
+// Index of white color pair.
 static const unsigned int White = 7;
 
 static const char WinMessage[] = "You found kitten! Way to go, robot!";
@@ -128,7 +124,7 @@ static struct {
   char** messages;
 } GameState;
 
-/* Special indices in the GameState.items array. */
+// Special indices in the GameState.items array.
 static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
@@ -206,7 +202,7 @@ static void initialize(size_t item_count) {
 
   signal(SIGINT, finish);
 
-  /* set up (n)curses */
+  // Set up (n)curses.
   initscr();
   nonl();
   noecho();
@@ -224,7 +220,7 @@ static void initialize(size_t item_count) {
   }
 
   GameState.items[Robot].character = (chtype)'#';
-  GameState.items[Robot].bold = false; /* we are a timid robot */
+  GameState.items[Robot].bold = false;    // We are a timid robot.
   GameState.items[Robot].reverse = false;
   GameState.items[Robot].y = random_y();
   GameState.items[Robot].x = random_x();
@@ -345,18 +341,19 @@ static void handle_resize(void) {
   int xbound = 0, ybound = 0;
   unsigned int i;
   for (i = 0; i < GameState.item_count; ++i) {
-    if (GameState.items[i].x > xbound)
+    if (GameState.items[i].x > xbound) {
       xbound = GameState.items[i].x;
-    if (GameState.items[i].y > ybound)
+    }
+    if (GameState.items[i].y > ybound) {
       ybound = GameState.items[i].y;
+    }
   }
 
-  /* has the resize hidden any items? */
+  // Has the resize hidden any items?
   if (xbound >= COLS - FrameThickness * 2 ||
       ybound >= HeaderSize + LINES - FrameThickness * 2) {
     endwin();
-    fprintf(stderr,
-                  "You crushed the simulation. And robot. And kitten.\n");
+    fprintf(stderr, "You crushed the simulation. And robot. And kitten.\n");
     exit(EXIT_FAILURE);
   }
 
@@ -392,7 +389,7 @@ static void play_animation(bool fromright) {
   robot.reverse = true;
 
   kitty = GameState.items[Kitten].character;
-  for (i = 4; i > 0; i--) {
+  for (i = 4; i > 0; --i) {
     GameState.items[Robot].character = (chtype)' ';
     GameState.items[Kitten].character = (chtype)' ';
 
@@ -432,13 +429,15 @@ static void play_animation(bool fromright) {
 }
 
 static void main_loop(void) {
-  int ch, x, y;
+  int x, y;
   unsigned int bnum = 0;
-  bool fromright;
+  bool fromright = false;
 
-  fromright = false;
-
-  while ((ch = getch()) != 0) {
+  while (true) {
+    int ch = getch();
+    if (0 == ch) {
+      break;
+    }
     y = GameState.items[Robot].y;
     x = GameState.items[Robot].x;
     switch (ch) {
@@ -447,8 +446,8 @@ static void main_loop(void) {
       case NUMLOCK_UL:
       case KEY_A1:
       case KEY_HOME:
-        y--;
-        x--;
+        --y;
+        --x;
         fromright = true;
         break;
       case EMACS_PREVIOUS:
@@ -456,8 +455,8 @@ static void main_loop(void) {
       case NETHACK_up:
       case NUMLOCK_UP:
       case KEY_UP:
-        /* fromright: special case */
-        y--;
+        // fromright: special case
+        --y;
         fromright = true;
         break;
       case NETHACK_UR:
@@ -465,15 +464,15 @@ static void main_loop(void) {
       case NUMLOCK_UR:
       case KEY_A3:
       case KEY_PPAGE:
-        y--;
-        x++;
+        --y;
+        ++x;
         break;
       case EMACS_BACKWARD:
       case NETHACK_LEFT:
       case NETHACK_left:
       case NUMLOCK_LEFT:
       case KEY_LEFT:
-        x--;
+        --x;
         fromright = true;
         break;
       case EMACS_FORWARD:
@@ -481,7 +480,7 @@ static void main_loop(void) {
       case NETHACK_right:
       case NUMLOCK_RIGHT:
       case KEY_RIGHT:
-        x++;
+        ++x;
         fromright = false;
         break;
       case NETHACK_DL:
@@ -489,8 +488,8 @@ static void main_loop(void) {
       case NUMLOCK_DL:
       case KEY_C1:
       case KEY_END:
-        y++;
-        x--;
+        ++y;
+        --x;
         fromright = true;
         break;
       case EMACS_NEXT:
@@ -498,15 +497,15 @@ static void main_loop(void) {
       case NETHACK_down:
       case NUMLOCK_DOWN:
       case KEY_DOWN:
-        y++;
+        ++y;
         break;
       case NETHACK_DR:
       case NETHACK_dr:
       case NUMLOCK_DR:
       case KEY_C3:
       case KEY_NPAGE:
-        y++;
-        x++;
+        ++y;
+        ++x;
         break;
       case MYKEY_Q:
       case MYKEY_q:
@@ -519,23 +518,21 @@ static void main_loop(void) {
         handle_resize();
         break;
       default:
-        message(
-            "Invalid input: Use direction keys"
-            " or q.");
+        message("Invalid input: Use direction keys or q.");
         break;
     }
 
-    /* it's the edge of the world as we know it... */
+    // It's the edge of the world as we know it...
     if ((y < HeaderSize + FrameThickness) ||
         (y >= GameState.lines - FrameThickness) || (x < FrameThickness) ||
         (x >= GameState.columns - FrameThickness)) {
       continue;
     }
 
-    /* let's see where we've landed */
+    // Let's see where we've landed.
     switch (test(y, x, &bnum)) {
       case 0:
-        /* robot moved */
+        // Robot moved.
         GameState.items[Robot].character = (chtype)' ';
         draw(&GameState.items[Robot]);
         GameState.items[Robot].y = y;
@@ -547,7 +544,7 @@ static void main_loop(void) {
         refresh();
         break;
       case BROBOT:
-        /* nothing happened */
+        // Nothing happened.
         break;
       case BKITTEN:
         play_animation(fromright);
@@ -563,7 +560,7 @@ static void main_loop(void) {
   }
 }
 
-int main(int count, char** arguments) {
+int main(int count, char* arguments[]) {
   int seed = time(0);
   size_t item_count = DefaultItemCount;
   bool options_present = false;
