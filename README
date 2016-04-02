@@ -3,7 +3,7 @@ headers are installed (libncursesN-dev in Debian GNU/Linux; installed by
 default with Xcode on Mac OS X).
 
 To compile, make sure you have the ncurses libraries installed, and simply
-type "./make".
+type "make".
 
 To install, do the preceeding and then copy the robotfindskitten binary to a
 place in your $PATH. A good place might be $HOME/bin, /usr/games, or
