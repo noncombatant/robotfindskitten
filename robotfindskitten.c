@@ -35,22 +35,18 @@
 
 #include "messages.h"
 
-#define PACKAGE_VERSION "1"
+static const char Version[] = "2.7182818";
 
-#define DEFAULT_NUM_BOGUS 20
-
-/* option flags for state.options */
+/* Option flags for GameState.options. */
 #define OPTION_HAS_COLOR 0x01
 #define OPTION_DISPLAY_INTRO 0x02
 
-#define DEFAULT_OPTIONS (OPTION_DISPLAY_INTRO)
-
-/* bits returned from test() */
+/* Bits returned from test. */
 #define BROBOT 0x01
 #define BKITTEN 0x02
 #define BBOGUS 0x04
 
-/* Nethack keycodes */
+/* Nethack keycodes. */
 #define NETHACK_down 'j'
 #define NETHACK_DOWN 'J'
 #define NETHACK_up 'k'
@@ -68,7 +64,7 @@
 #define NETHACK_dr 'n'
 #define NETHACK_DR 'N'
 
-/* When numlock is on, the keypad generates numbers */
+/* When numlock is on, the keypad generates numbers. */
 #define NUMLOCK_UL '7'
 #define NUMLOCK_UP '8'
 #define NUMLOCK_UR '9'
@@ -78,7 +74,7 @@
 #define NUMLOCK_DOWN '2'
 #define NUMLOCK_DR '3'
 
-/* Emacs keycodes */
+/* Emacs keycodes. */
 #define CTRL(key) ((key)&0x1f)
 #define EMACS_NEXT CTRL('N')
 #define EMACS_PREVIOUS CTRL('P')
@@ -98,11 +94,6 @@ static const int FrameThickness = 1;
 /* Index of white color pair. */
 static const unsigned int White = 7;
 
-/* special indices in the items array */
-#define ROBOT 0
-#define KITTEN 1
-#define BOGUS 2
-
 static const char WinMessage[] = "You found kitten! Way to go, robot!";
 
 typedef struct {
@@ -114,7 +105,7 @@ typedef struct {
   chtype character;
 } screen_object;
 
-typedef struct {
+static struct {
   int lines;
   int cols;
   unsigned int options;
@@ -123,27 +114,30 @@ typedef struct {
   size_t num_messages_alloc;
   screen_object* items;
   char** messages;
-} game_state;
+} GameState;
 
-static game_state state;
+/* Special indices in the GameState.items array. */
+static const size_t Robot = 0;
+static const size_t Kitten = 1;
+static const size_t Bogus = 2;
 
 static void add_message(const char* message) {
   static const size_t MSGS_ALLOC_CHUNK = 32;
-  if (state.num_messages_alloc <= state.num_messages) {
-    char** nmess = calloc(state.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
-    state.num_messages_alloc = state.num_messages + MSGS_ALLOC_CHUNK;
-    memcpy(nmess, state.messages, state.num_messages * sizeof(char*));
-    free(state.messages);
-    state.messages = nmess;
+  if (GameState.num_messages_alloc <= GameState.num_messages) {
+    char** nmess = calloc(GameState.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
+    GameState.num_messages_alloc = GameState.num_messages + MSGS_ALLOC_CHUNK;
+    memcpy(nmess, GameState.messages, GameState.num_messages * sizeof(char*));
+    free(GameState.messages);
+    GameState.messages = nmess;
   }
-  state.messages[state.num_messages] = strdup(message);
-  state.num_messages++;
+  GameState.messages[GameState.num_messages] = strdup(message);
+  GameState.num_messages++;
 }
 
 static void initialize_messages(void) {
-  state.messages = NULL;
-  state.num_messages = state.num_messages_alloc = 0;
-  for (size_t i = 0; i < BOGUS; ++i) {
+  GameState.messages = NULL;
+  GameState.num_messages = GameState.num_messages_alloc = 0;
+  for (size_t i = 0; i < Bogus; ++i) {
     add_message("");
   }
   for (size_t i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
@@ -152,23 +146,23 @@ static void initialize_messages(void) {
 }
 
 static void randomize_messages(void) {
-  for (size_t i = BOGUS; i < (state.num_messages - 1); i++) {
-    size_t j = i + (random() % (state.num_messages - i));
+  for (size_t i = Bogus; i < (GameState.num_messages - 1); i++) {
+    size_t j = i + (random() % (GameState.num_messages - i));
     if (i != j) {
-      char* temp = state.messages[i];
-      state.messages[i] = state.messages[j];
-      state.messages[j] = temp;
+      char* temp = GameState.messages[i];
+      GameState.messages[i] = GameState.messages[j];
+      GameState.messages[j] = temp;
     }
   }
 }
 
 static int random_x(void) {
-  return FrameThickness + (random() % (state.cols - FrameThickness * 2));
+  return FrameThickness + (random() % (GameState.cols - FrameThickness * 2));
 }
 
 static int random_y() {
   return HeaderSize + FrameThickness +
-         (random() % (state.lines - HeaderSize - FrameThickness * 2));
+         (random() % (GameState.lines - HeaderSize - FrameThickness * 2));
 }
 
 static bool random_bold(void) {
@@ -191,20 +185,19 @@ static bool object_equal(const screen_object a, const screen_object b) {
   return a.x == b.x && a.y == b.y;
 }
 
-static unsigned int test(int y, int x, unsigned int* bnum) {
-  unsigned int i;
-  for (i = 0; i < state.num_items; i++) {
-    if (state.items[i].x == x && state.items[i].y == y) {
+static size_t test(int y, int x, unsigned int* bnum) {
+  for (size_t i = 0; i < GameState.num_items; i++) {
+    if (GameState.items[i].x == x && GameState.items[i].y == y) {
       *bnum = i;
-      if (i == ROBOT)
+      if (Robot == i) {
         return BROBOT;
-      else if (i == KITTEN)
+      } else if (Kitten == i) {
         return BKITTEN;
-      else
+      } else {
         return BBOGUS;
+      }
     }
   }
-
   return 0;
 }
 
@@ -214,7 +207,7 @@ static void finish(int sig) {
 }
 
 static void initialize(size_t item_count) {
-  state.items = calloc(BOGUS + item_count, sizeof(screen_object));
+  GameState.items = calloc(Bogus + item_count, sizeof(screen_object));
 
   (void)signal(SIGINT, finish);
 
@@ -226,43 +219,43 @@ static void initialize(size_t item_count) {
   (void)intrflush(stdscr, false);
   (void)keypad(stdscr, true);
 
-  state.lines = LINES;
-  state.cols = COLS;
-  if (((state.lines - HeaderSize - FrameThickness) * state.cols) <
+  GameState.lines = LINES;
+  GameState.cols = COLS;
+  if (((GameState.lines - HeaderSize - FrameThickness) * GameState.cols) <
       (int)(item_count + 2)) {
     (void)endwin();
     (void)fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
   }
 
-  state.items[ROBOT].character = (chtype)'#';
-  state.items[ROBOT].bold = false; /* we are a timid robot */
-  state.items[ROBOT].reverse = false;
-  state.items[ROBOT].y = random_y();
-  state.items[ROBOT].x = random_x();
+  GameState.items[Robot].character = (chtype)'#';
+  GameState.items[Robot].bold = false; /* we are a timid robot */
+  GameState.items[Robot].reverse = false;
+  GameState.items[Robot].y = random_y();
+  GameState.items[Robot].x = random_x();
 
-  state.items[KITTEN].character = random_character();
-  state.items[KITTEN].bold = random_bold();
-  state.items[KITTEN].reverse = false;
+  GameState.items[Kitten].character = random_character();
+  GameState.items[Kitten].bold = random_bold();
+  GameState.items[Kitten].reverse = false;
   do {
-    state.items[KITTEN].y = random_y();
-    state.items[KITTEN].x = random_x();
-  } while (object_equal(state.items[ROBOT], state.items[KITTEN]));
+    GameState.items[Kitten].y = random_y();
+    GameState.items[Kitten].x = random_x();
+  } while (object_equal(GameState.items[Robot], GameState.items[Kitten]));
 
-  for (size_t i = BOGUS; i < BOGUS + item_count; i++) {
-    state.items[i].character = random_character();
-    state.items[i].bold = random_bold();
-    state.items[i].reverse = false;
+  for (size_t i = Bogus; i < Bogus + item_count; i++) {
+    GameState.items[i].character = random_character();
+    GameState.items[i].bold = random_bold();
+    GameState.items[i].reverse = false;
     while (true) {
-      state.items[i].y = random_y();
-      state.items[i].x = random_x();
-      if (object_equal(state.items[ROBOT], state.items[i]))
+      GameState.items[i].y = random_y();
+      GameState.items[i].x = random_x();
+      if (object_equal(GameState.items[Robot], GameState.items[i]))
         continue;
-      if (object_equal(state.items[KITTEN], state.items[i]))
+      if (object_equal(GameState.items[Kitten], GameState.items[i]))
         continue;
       size_t j;
       for (j = 0; j < i; j++) {
-        if (object_equal(state.items[j], state.items[i])) {
+        if (object_equal(GameState.items[j], GameState.items[i])) {
           break;
         }
       }
@@ -271,11 +264,11 @@ static void initialize(size_t item_count) {
       }
     }
   }
-  state.num_items = BOGUS + item_count;
+  GameState.num_items = Bogus + item_count;
 
   (void)start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
-    state.options |= OPTION_HAS_COLOR;
+    GameState.options |= OPTION_HAS_COLOR;
     (void)init_pair(1, COLOR_GREEN, COLOR_BLACK);
     (void)init_pair(2, COLOR_RED, COLOR_BLACK);
     (void)init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -285,19 +278,19 @@ static void initialize(size_t item_count) {
     (void)init_pair(7, COLOR_WHITE, COLOR_BLACK);
     (void)bkgd((chtype)COLOR_PAIR(White));
 
-    state.items[ROBOT].color = White;
-    state.items[KITTEN].color = random_color();
-    for (size_t i = BOGUS; i < state.num_items; i++) {
-      state.items[i].color = random_color();
+    GameState.items[Robot].color = White;
+    GameState.items[Kitten].color = random_color();
+    for (size_t i = Bogus; i < GameState.num_items; i++) {
+      GameState.items[i].color = random_color();
     }
   } else {
-    state.options &= ~OPTION_HAS_COLOR;
+    GameState.options &= ~OPTION_HAS_COLOR;
   }
 }
 
 static void draw(const screen_object* o) {
   assert(curscr != NULL);
-  if ((state.options & OPTION_HAS_COLOR) != 0) {
+  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
     attr_t new = COLOR_PAIR(o->color);
     if (o->bold) {
       new |= A_BOLD;
@@ -313,19 +306,19 @@ static void draw(const screen_object* o) {
 static void message(const char* message) {
   int y, x;
   getyx(curscr, y, x);
-  if ((state.options & OPTION_HAS_COLOR) != 0) {
+  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
     attrset(COLOR_PAIR(White));
   }
   (void)move(1, 0);
   (void)clrtoeol();
   (void)move(1, 0);
-  (void)printw("%.*s", state.cols, message);
+  (void)printw("%.*s", GameState.cols, message);
   (void)move(y, x);
   (void)refresh();
 }
 
 static void draw_screen() {
-  if ((state.options & OPTION_HAS_COLOR) != 0) {
+  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
     attrset(COLOR_PAIR(White));
   }
   (void)clear();
@@ -343,13 +336,13 @@ static void draw_screen() {
     (void)mvaddch((int)i, COLS - 1, ACS_VLINE);
   }
   (void)move(0, 0);
-  (void)printw("robotfindskitten %s\n\n", PACKAGE_VERSION);
-  for (size_t i = 0; i < state.num_items; i++) {
-    (void)move(state.items[i].y, state.items[i].x);
-    draw(&state.items[i]);
+  (void)printw("robotfindskitten %s\n\n", Version);
+  for (size_t i = 0; i < GameState.num_items; i++) {
+    (void)move(GameState.items[i].y, GameState.items[i].x);
+    draw(&GameState.items[i]);
   }
-  (void)move(state.items[ROBOT].y, state.items[ROBOT].x);
-  if ((state.options & OPTION_HAS_COLOR) != 0)
+  (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+  if ((GameState.options & OPTION_HAS_COLOR) != 0)
     (void)attrset(COLOR_PAIR(White));
   (void)refresh();
 }
@@ -357,11 +350,11 @@ static void draw_screen() {
 static void handle_resize(void) {
   int xbound = 0, ybound = 0;
   unsigned int i;
-  for (i = 0; i < state.num_items; i++) {
-    if (state.items[i].x > xbound)
-      xbound = state.items[i].x;
-    if (state.items[i].y > ybound)
-      ybound = state.items[i].y;
+  for (i = 0; i < GameState.num_items; i++) {
+    if (GameState.items[i].x > xbound)
+      xbound = GameState.items[i].x;
+    if (GameState.items[i].y > ybound)
+      ybound = GameState.items[i].y;
   }
 
   /* has the resize hidden any items? */
@@ -373,15 +366,15 @@ static void handle_resize(void) {
     exit(EXIT_FAILURE);
   }
 
-  state.lines = LINES;
-  state.cols = COLS;
+  GameState.lines = LINES;
+  GameState.cols = COLS;
   draw_screen();
 }
 
 static void instructions(void) {
   (void)clear();
   (void)move(0, 0);
-  (void)printw("robotfindskitten %s\n", PACKAGE_VERSION);
+  (void)printw("robotfindskitten %s\n", Version);
   (void)printw(
       "By the illustrious Leonard Richardson (C) 1997, 2000\n"
       "Written originally for the Nerth Pork robotfindskitten contest\n\n"
@@ -412,30 +405,30 @@ static void play_animation(bool fromright) {
   (void)clrtoeol();
   animation_meet = (COLS / 2);
 
-  memcpy(&kitten, &state.items[KITTEN], sizeof kitten);
-  memcpy(&robot, &state.items[ROBOT], sizeof robot);
+  memcpy(&kitten, &GameState.items[Kitten], sizeof kitten);
+  memcpy(&robot, &GameState.items[Robot], sizeof robot);
   robot.reverse = true;
 
-  kitty = state.items[KITTEN].character;
+  kitty = GameState.items[Kitten].character;
   for (i = 4; i > 0; i--) {
-    state.items[ROBOT].character = (chtype)' ';
-    state.items[KITTEN].character = (chtype)' ';
+    GameState.items[Robot].character = (chtype)' ';
+    GameState.items[Kitten].character = (chtype)' ';
 
-    (void)move(state.items[ROBOT].y, state.items[ROBOT].x);
-    draw(&state.items[ROBOT]);
-    (void)move(state.items[KITTEN].y, state.items[KITTEN].x);
-    draw(&state.items[KITTEN]);
+    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+    draw(&GameState.items[Robot]);
+    (void)move(GameState.items[Kitten].y, GameState.items[Kitten].x);
+    draw(&GameState.items[Kitten]);
 
-    state.items[ROBOT].character = (chtype)'#';
-    state.items[KITTEN].character = kitty;
-    state.items[ROBOT].y = 1;
-    state.items[KITTEN].y = 1;
+    GameState.items[Robot].character = (chtype)'#';
+    GameState.items[Kitten].character = kitty;
+    GameState.items[Robot].y = 1;
+    GameState.items[Kitten].y = 1;
     if (fromright) {
-      state.items[ROBOT].x = animation_meet + i;
-      state.items[KITTEN].x = animation_meet - i + 1;
+      GameState.items[Robot].x = animation_meet + i;
+      GameState.items[Kitten].x = animation_meet - i + 1;
     } else {
-      state.items[ROBOT].x = animation_meet - i + 1;
-      state.items[KITTEN].x = animation_meet + i;
+      GameState.items[Robot].x = animation_meet - i + 1;
+      GameState.items[Kitten].x = animation_meet + i;
     }
 
     (void)move(kitten.y, kitten.x);
@@ -443,11 +436,11 @@ static void play_animation(bool fromright) {
     (void)move(robot.y, robot.x);
     draw(&robot);
 
-    (void)move(state.items[ROBOT].y, state.items[ROBOT].x);
-    draw(&state.items[ROBOT]);
-    (void)move(state.items[KITTEN].y, state.items[KITTEN].x);
-    draw(&state.items[KITTEN]);
-    (void)move(state.items[ROBOT].y, state.items[ROBOT].x);
+    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+    draw(&GameState.items[Robot]);
+    (void)move(GameState.items[Kitten].y, GameState.items[Kitten].x);
+    draw(&GameState.items[Kitten]);
+    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
     (void)refresh();
     (void)sleep(1);
   }
@@ -464,8 +457,8 @@ static void main_loop(void) {
   fromright = false;
 
   while ((ch = getch()) != 0) {
-    y = state.items[ROBOT].y;
-    x = state.items[ROBOT].x;
+    y = GameState.items[Robot].y;
+    x = GameState.items[Robot].x;
     switch (ch) {
       case NETHACK_UL:
       case NETHACK_ul:
@@ -552,8 +545,8 @@ static void main_loop(void) {
 
     /* it's the edge of the world as we know it... */
     if ((y < HeaderSize + FrameThickness) ||
-        (y >= state.lines - FrameThickness) || (x < FrameThickness) ||
-        (x >= state.cols - FrameThickness)) {
+        (y >= GameState.lines - FrameThickness) || (x < FrameThickness) ||
+        (x >= GameState.cols - FrameThickness)) {
       continue;
     }
 
@@ -561,13 +554,13 @@ static void main_loop(void) {
     switch (test(y, x, &bnum)) {
       case 0:
         /* robot moved */
-        state.items[ROBOT].character = (chtype)' ';
-        draw(&state.items[ROBOT]);
-        state.items[ROBOT].y = y;
-        state.items[ROBOT].x = x;
-        state.items[ROBOT].character = (chtype)'#';
+        GameState.items[Robot].character = (chtype)' ';
+        draw(&GameState.items[Robot]);
+        GameState.items[Robot].y = y;
+        GameState.items[Robot].x = x;
+        GameState.items[Robot].character = (chtype)'#';
         (void)move(y, x);
-        draw(&state.items[ROBOT]);
+        draw(&GameState.items[Robot]);
         (void)move(y, x);
         (void)refresh();
         break;
@@ -579,7 +572,7 @@ static void main_loop(void) {
         finish(0);
         break;
       case BBOGUS:
-        message(state.messages[bnum]);
+        message(GameState.messages[bnum]);
         break;
       default:
         message("Well, that was unexpected...");
@@ -590,7 +583,7 @@ static void main_loop(void) {
 
 int main(int count, char** arguments) {
   int seed = time(0);
-  size_t item_count = DEFAULT_NUM_BOGUS;
+  size_t item_count = 20;
 
   while (true) {
     int option = getopt(count, arguments, "n:s:Vh");
@@ -612,7 +605,7 @@ int main(int count, char** arguments) {
         seed = atoi(optarg);
         break;
       case 'V':
-        (void)printf("robotfindskitten: %s\n", PACKAGE_VERSION);
+        (void)printf("robotfindskitten: %s\n", Version);
         exit(EXIT_SUCCESS);
       case 'h':
       case '?':
@@ -622,14 +615,14 @@ int main(int count, char** arguments) {
     }
   }
 
-  state.options = DEFAULT_OPTIONS;
+  GameState.options = OPTION_DISPLAY_INTRO;
   srandom(seed);
   initialize_messages();
-  assert(state.num_messages > 0);
+  assert(GameState.num_messages > 0);
   randomize_messages();
 
-  if (item_count > state.num_messages) {
-    item_count = state.num_messages;
+  if (item_count > GameState.num_messages) {
+    item_count = GameState.num_messages;
   }
   initialize(item_count);
 
