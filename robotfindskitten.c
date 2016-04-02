@@ -264,9 +264,7 @@ static void read_messages(void) {
   for (i = 0; i < BOGUS; i++)
     add_message("", 1);
 
-#ifndef S_SPLINT_S
   do_read_messages(SYSTEM_NKI_DIR);
-#endif /* S_SPLINT_S */
 
   /* coverity[tainted_data] Safe, never handed to exec */
   home_dir = getenv("HOME");
@@ -772,9 +770,7 @@ int main(int argc, char** argv) {
   }
 
   state.options = DEFAULT_OPTIONS;
-#ifndef S_SPLINT_S
   srandom(seed);
-#endif /* S_SPLINT_S */
   read_messages();
 
   if (state.num_messages == 0) {
