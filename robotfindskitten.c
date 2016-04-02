@@ -51,45 +51,44 @@ static const char Introduction[] =
 
 static const size_t DefaultItemCount = 20;
 
-// Nethack keycodes.
-#define NETHACK_down 'j'
-#define NETHACK_DOWN 'J'
-#define NETHACK_up 'k'
-#define NETHACK_UP 'K'
-#define NETHACK_left 'h'
-#define NETHACK_LEFT 'H'
-#define NETHACK_right 'l'
-#define NETHACK_RIGHT 'L'
-#define NETHACK_ul 'y'
-#define NETHACK_UL 'Y'
-#define NETHACK_ur 'u'
-#define NETHACK_UR 'U'
-#define NETHACK_dl 'b'
-#define NETHACK_DL 'B'
-#define NETHACK_dr 'n'
-#define NETHACK_DR 'N'
+#define CONTROL(key) ((key) & 0x1f)
 
-// When numlock is on, the keypad generates numbers.
-#define NUMLOCK_UL '7'
-#define NUMLOCK_UP '8'
-#define NUMLOCK_UR '9'
-#define NUMLOCK_LEFT '4'
-#define NUMLOCK_RIGHT '6'
-#define NUMLOCK_DL '1'
-#define NUMLOCK_DOWN '2'
-#define NUMLOCK_DR '3'
+typedef enum {
+  NetHack_down = 'j',
+  NetHack_DOWN = 'J',
+  NetHack_up = 'k',
+  NetHack_UP = 'K',
+  NetHack_left = 'h',
+  NetHack_LEFT = 'H',
+  NetHack_right = 'l',
+  NetHack_RIGHT = 'L',
+  NetHack_up_left = 'y',
+  NetHack_UP_LEFT = 'Y',
+  NetHack_up_right = 'u',
+  NetHack_UP_RIGHT = 'U',
+  NetHack_down_left = 'b',
+  NetHack_DOWN_LEFT = 'B',
+  NetHack_down_right = 'n',
+  NetHack_DOWN_RIGHT = 'N',
 
-// Emacs keycodes.
-#define CTRL(key) ((key)&0x1f)
-#define EMACS_NEXT CTRL('N')
-#define EMACS_PREVIOUS CTRL('P')
-#define EMACS_BACKWARD CTRL('B')
-#define EMACS_FORWARD CTRL('F')
+  NumLock_UP_LEFT = '7',
+  NumLock_UP = '8',
+  NumLock_UP_RIGHT = '9',
+  NumLock_LEFT = '4',
+  NumLock_RIGHT = '6',
+  NumLock_DOWN_LEFT = '1',
+  NumLock_DOWN = '2',
+  NumLock_DOWN_RIGHT = '3',
 
-// Miscellaneous. I'm paranoid about collisions with curses in the KEY_ namespace
-#define MYKEY_REDRAW CTRL('L')
-#define MYKEY_q 'q'
-#define MYKEY_Q 'Q'
+  Emacs_NEXT = CONTROL('N'),
+  Emacs_PREVIOUS = CONTROL('P'),
+  Emacs_BACKWARD = CONTROL('B'),
+  Emacs_FORWARD = CONTROL('F'),
+
+  Key_RedrawScreen = CONTROL('L'),
+  Key_quit = 'q',
+  Key_QUIT = 'Q',
+} KeyCode;
 
 // Size of header area above frame and playing field.
 static const int HeaderSize = 2;
@@ -308,7 +307,7 @@ static void message(const char* message) {
   refresh();
 }
 
-static void draw_screen() {
+static void redraw_screen() {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
@@ -361,7 +360,7 @@ static void handle_resize(void) {
 
   GameState.lines = LINES;
   GameState.columns = COLS;
-  draw_screen();
+  redraw_screen();
 }
 
 static void show_introduction(void) {
@@ -443,78 +442,78 @@ static void main_loop(void) {
     y = GameState.items[Robot].y;
     x = GameState.items[Robot].x;
     switch (ch) {
-      case NETHACK_UL:
-      case NETHACK_ul:
-      case NUMLOCK_UL:
+      case NetHack_UP_LEFT:
+      case NetHack_up_left:
+      case NumLock_UP_LEFT:
       case KEY_A1:
       case KEY_HOME:
         --y;
         --x;
         fromright = true;
         break;
-      case EMACS_PREVIOUS:
-      case NETHACK_UP:
-      case NETHACK_up:
-      case NUMLOCK_UP:
+      case Emacs_PREVIOUS:
+      case NetHack_UP:
+      case NetHack_up:
+      case NumLock_UP:
       case KEY_UP:
         // fromright: special case
         --y;
         fromright = true;
         break;
-      case NETHACK_UR:
-      case NETHACK_ur:
-      case NUMLOCK_UR:
+      case NetHack_UP_RIGHT:
+      case NetHack_up_right:
+      case NumLock_UP_RIGHT:
       case KEY_A3:
       case KEY_PPAGE:
         --y;
         ++x;
         break;
-      case EMACS_BACKWARD:
-      case NETHACK_LEFT:
-      case NETHACK_left:
-      case NUMLOCK_LEFT:
+      case Emacs_BACKWARD:
+      case NetHack_LEFT:
+      case NetHack_left:
+      case NumLock_LEFT:
       case KEY_LEFT:
         --x;
         fromright = true;
         break;
-      case EMACS_FORWARD:
-      case NETHACK_RIGHT:
-      case NETHACK_right:
-      case NUMLOCK_RIGHT:
+      case Emacs_FORWARD:
+      case NetHack_RIGHT:
+      case NetHack_right:
+      case NumLock_RIGHT:
       case KEY_RIGHT:
         ++x;
         fromright = false;
         break;
-      case NETHACK_DL:
-      case NETHACK_dl:
-      case NUMLOCK_DL:
+      case NetHack_DOWN_LEFT:
+      case NetHack_down_left:
+      case NumLock_DOWN_LEFT:
       case KEY_C1:
       case KEY_END:
         ++y;
         --x;
         fromright = true;
         break;
-      case EMACS_NEXT:
-      case NETHACK_DOWN:
-      case NETHACK_down:
-      case NUMLOCK_DOWN:
+      case Emacs_NEXT:
+      case NetHack_DOWN:
+      case NetHack_down:
+      case NumLock_DOWN:
       case KEY_DOWN:
         ++y;
         break;
-      case NETHACK_DR:
-      case NETHACK_dr:
-      case NUMLOCK_DR:
+      case NetHack_DOWN_RIGHT:
+      case NetHack_down_right:
+      case NumLock_DOWN_RIGHT:
       case KEY_C3:
       case KEY_NPAGE:
         ++y;
         ++x;
         break;
-      case MYKEY_Q:
-      case MYKEY_q:
+      case Key_QUIT:
+      case Key_quit:
         finish(EXIT_FAILURE);
         break;
-      case MYKEY_REDRAW:
-        draw_screen();
+      case Key_RedrawScreen:
+        redraw_screen();
         break;
       case KEY_RESIZE:
         handle_resize();
@@ -601,7 +600,7 @@ int main(int count, char* arguments[]) {
   if (!options_present) {
     show_introduction();
   }
-  draw_screen();
+  redraw_screen();
   main_loop();
   finish(EXIT_SUCCESS);
   return EXIT_SUCCESS;
