@@ -35,7 +35,7 @@
 
 #include "messages.h"
 
-static const char Version[] = "2.7182818";
+static const char Version[] = "2.71828182";
 
 /* Option flags for GameState.options. */
 #define OPTION_HAS_COLOR 0x01
