@@ -743,10 +743,16 @@ static void main_loop(void) {
   }
 }
 
-int main(int argc, char** argv) {
-  int option, seed = (int)time(0), nbogus = DEFAULT_NUM_BOGUS;
+int main(int count, char** arguments) {
+  int seed = time(0);
+  int nbogus = DEFAULT_NUM_BOGUS;
 
-  while ((option = getopt(argc, argv, "n:s:Vh")) != -1) {
+  while (true) {
+    int option = getopt(count, arguments, "n:s:Vh");
+    if (-1 == option) {
+      break;
+    }
+
     switch (option) {
       case 'n':
         nbogus = atoi(optarg);
@@ -764,7 +770,7 @@ int main(int argc, char** argv) {
       case 'h':
       case '?':
       default:
-        (void)printf("usage: %s [-n nitems] [-s seed] [-V]\n", argv[0]);
+        (void)printf("usage: %s [-n nitems] [-s seed] [-V]\n", arguments[0]);
         exit(EXIT_SUCCESS);
     }
   }
