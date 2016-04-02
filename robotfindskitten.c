@@ -168,7 +168,10 @@ static void randomize_messages(void) {
 #define randx() (FRAME + (random() % (state.cols - FRAME * 2)))
 #define randy() \
   (HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2)))
-#define randbold() ((random() % 2) ? true : false)
+
+static bool random_bold(void) {
+  return random() % 2 ? true : false;
+}
 
 static unsigned int random_color(void) {
   return random() % 6 + 1;
@@ -240,7 +243,7 @@ static void initialize(size_t item_count) {
 
   /* set up kitten */
   state.items[KITTEN].character = random_character();
-  state.items[KITTEN].bold = randbold();
+  state.items[KITTEN].bold = random_bold();
   state.items[KITTEN].reverse = false;
   do {
     state.items[KITTEN].y = randy();
@@ -250,7 +253,7 @@ static void initialize(size_t item_count) {
   /* set up items */
   for (i = BOGUS; i < BOGUS + item_count; i++) {
     state.items[i].character = random_character();
-    state.items[i].bold = randbold();
+    state.items[i].bold = random_bold();
     state.items[i].reverse = false;
     while (true) {
       state.items[i].y = randy();
