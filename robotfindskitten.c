@@ -1,4 +1,4 @@
-// Copyright © 2004-2005 Alexey Toptygin <alexeyt@freeshell.org> Based on
+// Copyright © 2004 – 2005 Alexey Toptygin <alexeyt@freeshell.org>. Based on
 // sources by Leonard Richardson and others.
 //
 // Refactored (...defactored?) by Chris Palmer <https://noncombatant.org> on 1
