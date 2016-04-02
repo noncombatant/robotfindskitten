@@ -37,9 +37,7 @@
 
 static const char Version[] = "2.71828182";
 
-/* Option flags for GameState.options. */
-#define OPTION_HAS_COLOR 0x01
-#define OPTION_DISPLAY_INTRO 0x02
+static const size_t DefaultItemCount = 20;
 
 /* Bits returned from test. */
 #define BROBOT 0x01
@@ -108,7 +106,7 @@ typedef struct {
 static struct {
   int lines;
   int columns;
-  unsigned int options;
+  bool screen_has_color;
   size_t item_count;
   size_t message_count;
   screen_object items[MessageCount];
@@ -247,9 +245,10 @@ static void initialize(size_t item_count) {
     }
   }
 
+  GameState.screen_has_color = false;
   (void)start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
-    GameState.options |= OPTION_HAS_COLOR;
+    GameState.screen_has_color = true;
     (void)init_pair(1, COLOR_GREEN, COLOR_BLACK);
     (void)init_pair(2, COLOR_RED, COLOR_BLACK);
     (void)init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -264,14 +263,12 @@ static void initialize(size_t item_count) {
     for (size_t i = Bogus; i < GameState.item_count; ++i) {
       GameState.items[i].color = random_color();
     }
-  } else {
-    GameState.options &= ~OPTION_HAS_COLOR;
   }
 }
 
 static void draw(const screen_object* o) {
   assert(curscr != NULL);
-  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
+  if (GameState.screen_has_color) {
     attr_t new = COLOR_PAIR(o->color);
     if (o->bold) {
       new |= A_BOLD;
@@ -287,7 +284,7 @@ static void draw(const screen_object* o) {
 static void message(const char* message) {
   int y, x;
   getyx(curscr, y, x);
-  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
+  if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
   (void)move(1, 0);
@@ -299,7 +296,7 @@ static void message(const char* message) {
 }
 
 static void draw_screen() {
-  if ((GameState.options & OPTION_HAS_COLOR) != 0) {
+  if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
   (void)clear();
@@ -323,8 +320,9 @@ static void draw_screen() {
     draw(&GameState.items[i]);
   }
   (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
-  if ((GameState.options & OPTION_HAS_COLOR) != 0)
+  if (GameState.screen_has_color) {
     (void)attrset(COLOR_PAIR(White));
+  }
   (void)refresh();
 }
 
@@ -564,7 +562,8 @@ static void main_loop(void) {
 
 int main(int count, char** arguments) {
   int seed = time(0);
-  size_t item_count = 20;
+  size_t item_count = DefaultItemCount;
+  bool options_present = false;
 
   while (true) {
     int option = getopt(count, arguments, "n:s:h");
@@ -580,10 +579,12 @@ int main(int count, char** arguments) {
           exit(EXIT_FAILURE);
         }
         item_count = i;
+        options_present = true;
         break;
       }
       case 's':
         seed = atoi(optarg);
+        options_present = true;
         break;
       case 'h':
       case '?':
@@ -593,10 +594,11 @@ int main(int count, char** arguments) {
     }
   }
 
-  GameState.options = OPTION_DISPLAY_INTRO;
   srandom(seed);
   initialize(item_count);
-  instructions();
+  if (!options_present) {
+    instructions();
+  }
   draw_screen();
   main_loop();
   finish(EXIT_SUCCESS);
