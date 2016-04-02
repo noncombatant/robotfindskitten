@@ -51,11 +51,6 @@ static const char Introduction[] =
 
 static const size_t DefaultItemCount = 20;
 
-// Bits returned from test.
-#define BROBOT 0x01
-#define BKITTEN 0x02
-#define BBOGUS 0x04
-
 // Nethack keycodes.
 #define NETHACK_down 'j'
 #define NETHACK_DOWN 'J'
@@ -174,16 +169,23 @@ static bool object_equal(const screen_object a, const screen_object b) {
   return a.x == b.x && a.y == b.y;
 }
 
-static size_t test(int y, int x, unsigned int* bnum) {
+typedef enum {
+  TouchTestResultNone,
+  TouchTestResultRobot,
+  TouchTestResultKitten,
+  TouchTestResultNonKitten,
+} TouchTestResult;
+
+static TouchTestResult touch_test(int y, int x, size_t* item_number) {
   for (size_t i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x == x && GameState.items[i].y == y) {
-      *bnum = i;
+      *item_number = i;
       if (Robot == i) {
-        return BROBOT;
+        return TouchTestResultRobot;
       } else if (Kitten == i) {
-        return BKITTEN;
+        return TouchTestResultKitten;
       } else {
-        return BBOGUS;
+        return TouchTestResultNonKitten;
       }
     }
   }
@@ -430,7 +432,7 @@ static void play_animation(bool fromright) {
 
 static void main_loop(void) {
   int x, y;
-  unsigned int bnum = 0;
+  size_t item_number = 0;
   bool fromright = false;
 
   while (true) {
@@ -530,8 +532,8 @@ static void main_loop(void) {
     }
 
     // Let's see where we've landed.
-    switch (test(y, x, &bnum)) {
-      case 0:
+    switch (touch_test(y, x, &item_number)) {
+      case TouchTestResultNone:
         // Robot moved.
         GameState.items[Robot].character = (chtype)' ';
         draw(&GameState.items[Robot]);
@@ -543,15 +545,15 @@ static void main_loop(void) {
         move(y, x);
         refresh();
         break;
-      case BROBOT:
+      case TouchTestResultRobot:
         // Nothing happened.
         break;
-      case BKITTEN:
+      case TouchTestResultKitten:
         play_animation(fromright);
         finish(0);
         break;
-      case BBOGUS:
-        message(GameState.messages[bnum]);
+      case TouchTestResultNonKitten:
+        message(GameState.messages[item_number]);
         break;
       default:
         message("Well, that was unexpected...");
