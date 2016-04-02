@@ -180,7 +180,7 @@ static size_t test(int y, int x, unsigned int* bnum) {
 }
 
 static void finish(int sig) {
-  (void)endwin();
+  endwin();
   exit(sig);
 }
 
@@ -189,22 +189,22 @@ static void initialize(size_t item_count) {
   item_count = GameState.message_count ? item_count : GameState.message_count;
   GameState.item_count = Bogus + item_count;
 
-  (void)signal(SIGINT, finish);
+  signal(SIGINT, finish);
 
   /* set up (n)curses */
-  (void)initscr();
-  (void)nonl();
-  (void)noecho();
-  (void)cbreak();
-  (void)intrflush(stdscr, false);
-  (void)keypad(stdscr, true);
+  initscr();
+  nonl();
+  noecho();
+  cbreak();
+  intrflush(stdscr, false);
+  keypad(stdscr, true);
 
   GameState.lines = LINES;
   GameState.columns = COLS;
   if (((GameState.lines - HeaderSize - FrameThickness) * GameState.columns) <
       (int)(item_count + 2)) {
-    (void)endwin();
-    (void)fprintf(stderr, "Screen too small to fit all objects!\n");
+    endwin();
+    fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
   }
 
@@ -246,17 +246,17 @@ static void initialize(size_t item_count) {
   }
 
   GameState.screen_has_color = false;
-  (void)start_color();
+  start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
     GameState.screen_has_color = true;
-    (void)init_pair(1, COLOR_GREEN, COLOR_BLACK);
-    (void)init_pair(2, COLOR_RED, COLOR_BLACK);
-    (void)init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-    (void)init_pair(4, COLOR_BLUE, COLOR_BLACK);
-    (void)init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-    (void)init_pair(6, COLOR_CYAN, COLOR_BLACK);
-    (void)init_pair(7, COLOR_WHITE, COLOR_BLACK);
-    (void)bkgd((chtype)COLOR_PAIR(White));
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_CYAN, COLOR_BLACK);
+    init_pair(7, COLOR_WHITE, COLOR_BLACK);
+    bkgd((chtype)COLOR_PAIR(White));
 
     GameState.items[Robot].color = White;
     GameState.items[Kitten].color = random_color();
@@ -276,9 +276,9 @@ static void draw(const screen_object* o) {
     if (o->reverse) {
       new |= A_REVERSE;
     }
-    (void)attrset(new);
+    attrset(new);
   }
-  (void)addch(o->character);
+  addch(o->character);
 }
 
 static void message(const char* message) {
@@ -287,43 +287,43 @@ static void message(const char* message) {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
-  (void)move(1, 0);
-  (void)clrtoeol();
-  (void)move(1, 0);
-  (void)printw("%.*s", GameState.columns, message);
-  (void)move(y, x);
-  (void)refresh();
+  move(1, 0);
+  clrtoeol();
+  move(1, 0);
+  printw("%.*s", GameState.columns, message);
+  move(y, x);
+  refresh();
 }
 
 static void draw_screen() {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
-  (void)clear();
-  (void)mvaddch(HeaderSize, 0, ACS_ULCORNER);
-  (void)mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
-  (void)mvaddch(LINES - 1, 0, ACS_LLCORNER);
-  (void)mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
+  clear();
+  mvaddch(HeaderSize, 0, ACS_ULCORNER);
+  mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
+  mvaddch(LINES - 1, 0, ACS_LLCORNER);
+  mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
   for (unsigned int i = 1; i < (unsigned int)COLS - 1; ++i) {
-    (void)mvaddch(HeaderSize, (int)i, ACS_HLINE);
-    (void)mvaddch(LINES - 1, (int)i, ACS_HLINE);
+    mvaddch(HeaderSize, (int)i, ACS_HLINE);
+    mvaddch(LINES - 1, (int)i, ACS_HLINE);
   }
   for (unsigned int i = FrameThickness + HeaderSize;
        i < (unsigned int)LINES - 1; ++i) {
-    (void)mvaddch((int)i, 0, ACS_VLINE);
-    (void)mvaddch((int)i, COLS - 1, ACS_VLINE);
+    mvaddch((int)i, 0, ACS_VLINE);
+    mvaddch((int)i, COLS - 1, ACS_VLINE);
   }
-  (void)move(0, 0);
-  (void)printw("robotfindskitten %s\n\n", Version);
+  move(0, 0);
+  printw("robotfindskitten %s\n\n", Version);
   for (size_t i = 0; i < GameState.item_count; ++i) {
-    (void)move(GameState.items[i].y, GameState.items[i].x);
+    move(GameState.items[i].y, GameState.items[i].x);
     draw(&GameState.items[i]);
   }
-  (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+  move(GameState.items[Robot].y, GameState.items[Robot].x);
   if (GameState.screen_has_color) {
-    (void)attrset(COLOR_PAIR(White));
+    attrset(COLOR_PAIR(White));
   }
-  (void)refresh();
+  refresh();
 }
 
 static void handle_resize(void) {
@@ -339,8 +339,8 @@ static void handle_resize(void) {
   /* has the resize hidden any items? */
   if (xbound >= COLS - FrameThickness * 2 ||
       ybound >= HeaderSize + LINES - FrameThickness * 2) {
-    (void)endwin();
-    (void)fprintf(stderr,
+    endwin();
+    fprintf(stderr,
                   "You crushed the simulation. And robot. And kitten.\n");
     exit(EXIT_FAILURE);
   }
@@ -351,10 +351,10 @@ static void handle_resize(void) {
 }
 
 static void instructions(void) {
-  (void)clear();
-  (void)move(0, 0);
-  (void)printw("robotfindskitten %s\n", Version);
-  (void)printw(
+  clear();
+  move(0, 0);
+  printw("robotfindskitten %s\n", Version);
+  printw(
       "By the illustrious Leonard Richardson (C) 1997, 2000\n"
       "Written originally for the Nerth Pork robotfindskitten contest\n\n"
       "In this game, you are robot (#). Your job is to find kitten. This task\n"
@@ -367,11 +367,11 @@ static void instructions(void) {
       "the q key or a good old-fashioned Ctrl-C.\n\n"
       "See the documentation for more information.\n\n"
       "Press any key to start.\n");
-  (void)refresh();
+  refresh();
   if (getch() == KEY_RESIZE) {
     handle_resize();
   }
-  (void)clear();
+  clear();
 }
 
 static void play_animation(bool fromright) {
@@ -380,8 +380,8 @@ static void play_animation(bool fromright) {
   screen_object kitten;
   chtype kitty;
 
-  (void)move(1, 0);
-  (void)clrtoeol();
+  move(1, 0);
+  clrtoeol();
   animation_meet = (COLS / 2);
 
   memcpy(&kitten, &GameState.items[Kitten], sizeof kitten);
@@ -393,9 +393,9 @@ static void play_animation(bool fromright) {
     GameState.items[Robot].character = (chtype)' ';
     GameState.items[Kitten].character = (chtype)' ';
 
-    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+    move(GameState.items[Robot].y, GameState.items[Robot].x);
     draw(&GameState.items[Robot]);
-    (void)move(GameState.items[Kitten].y, GameState.items[Kitten].x);
+    move(GameState.items[Kitten].y, GameState.items[Kitten].x);
     draw(&GameState.items[Kitten]);
 
     GameState.items[Robot].character = (chtype)'#';
@@ -410,22 +410,22 @@ static void play_animation(bool fromright) {
       GameState.items[Kitten].x = animation_meet + i;
     }
 
-    (void)move(kitten.y, kitten.x);
+    move(kitten.y, kitten.x);
     draw(&kitten);
-    (void)move(robot.y, robot.x);
+    move(robot.y, robot.x);
     draw(&robot);
 
-    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
+    move(GameState.items[Robot].y, GameState.items[Robot].x);
     draw(&GameState.items[Robot]);
-    (void)move(GameState.items[Kitten].y, GameState.items[Kitten].x);
+    move(GameState.items[Kitten].y, GameState.items[Kitten].x);
     draw(&GameState.items[Kitten]);
-    (void)move(GameState.items[Robot].y, GameState.items[Robot].x);
-    (void)refresh();
-    (void)sleep(1);
+    move(GameState.items[Robot].y, GameState.items[Robot].x);
+    refresh();
+    sleep(1);
   }
   message(WinMessage);
-  (void)curs_set(0);
-  (void)sleep(1);
+  curs_set(0);
+  sleep(1);
 }
 
 static void main_loop(void) {
@@ -538,10 +538,10 @@ static void main_loop(void) {
         GameState.items[Robot].y = y;
         GameState.items[Robot].x = x;
         GameState.items[Robot].character = (chtype)'#';
-        (void)move(y, x);
+        move(y, x);
         draw(&GameState.items[Robot]);
-        (void)move(y, x);
-        (void)refresh();
+        move(y, x);
+        refresh();
         break;
       case BROBOT:
         /* nothing happened */
@@ -575,7 +575,7 @@ int main(int count, char** arguments) {
       case 'n': {
         int i = atoi(optarg);
         if (i <= 0) {
-          (void)fprintf(stderr, "Argument must be positive.\n");
+          fprintf(stderr, "Argument must be positive.\n");
           exit(EXIT_FAILURE);
         }
         item_count = i;
@@ -589,7 +589,7 @@ int main(int count, char** arguments) {
       case 'h':
       case '?':
       default:
-        (void)printf("usage: %s [-n item-count] [-s seed]\n", arguments[0]);
+        printf("usage: %s [-n item-count] [-s seed]\n", arguments[0]);
         exit(EXIT_SUCCESS);
     }
   }
