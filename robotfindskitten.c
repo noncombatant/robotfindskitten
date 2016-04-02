@@ -20,8 +20,6 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <sys/stat.h>
-
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
@@ -107,6 +105,8 @@
 #define KITTEN 1
 #define BOGUS 2
 
+static const char WinMessage[] = "You found kitten! Way to go, robot!";
+
 typedef struct {
   int x;
   int y;
@@ -164,10 +164,13 @@ static void randomize_messages(void) {
   }
 }
 
-/* convenient macros */
-#define randx() (FRAME + (random() % (state.cols - FRAME * 2)))
-#define randy() \
-  (HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2)))
+static int random_x(void) {
+  return FRAME + (random() % (state.cols - FRAME * 2));
+}
+
+static int random_y() {
+  return HEADSIZE + FRAME + (random() % (state.lines - HEADSIZE - FRAME * 2));
+}
 
 static bool random_bold(void) {
   return random() % 2 ? true : false;
@@ -238,16 +241,16 @@ static void initialize(size_t item_count) {
   state.items[ROBOT].character = (chtype)'#';
   state.items[ROBOT].bold = false; /* we are a timid robot */
   state.items[ROBOT].reverse = false;
-  state.items[ROBOT].y = randy();
-  state.items[ROBOT].x = randx();
+  state.items[ROBOT].y = random_y();
+  state.items[ROBOT].x = random_x();
 
   /* set up kitten */
   state.items[KITTEN].character = random_character();
   state.items[KITTEN].bold = random_bold();
   state.items[KITTEN].reverse = false;
   do {
-    state.items[KITTEN].y = randy();
-    state.items[KITTEN].x = randx();
+    state.items[KITTEN].y = random_y();
+    state.items[KITTEN].x = random_x();
   } while (object_equal(state.items[ROBOT], state.items[KITTEN]));
 
   /* set up items */
@@ -256,8 +259,8 @@ static void initialize(size_t item_count) {
     state.items[i].bold = random_bold();
     state.items[i].reverse = false;
     while (true) {
-      state.items[i].y = randy();
-      state.items[i].x = randx();
+      state.items[i].y = random_y();
+      state.items[i].x = random_x();
       if (object_equal(state.items[ROBOT], state.items[i]))
         continue;
       if (object_equal(state.items[KITTEN], state.items[i]))
@@ -312,9 +315,8 @@ static void draw(const screen_object* o) {
   (void)addch(o->character);
 }
 
-static void message(char* message) {
+static void message(const char* message) {
   int y, x;
-
   getyx(curscr, y, x);
   if ((state.options & OPTION_HAS_COLOR) != 0) {
     attrset(COLOR_PAIR(WHITE));
@@ -404,8 +406,9 @@ static void instructions(void) {
       "See the documentation for more information.\n\n"
       "Press any key to start.\n");
   (void)refresh();
-  if (getch() == KEY_RESIZE)
+  if (getch() == KEY_RESIZE) {
     handle_resize();
+  }
   (void)clear();
 }
 
@@ -414,7 +417,6 @@ static void play_animation(bool fromright) {
   screen_object robot;
   screen_object kitten;
   chtype kitty;
-#define WIN_MESSAGE "You found kitten! Way to go, robot!"
 
   (void)move(1, 0);
   (void)clrtoeol();
@@ -459,7 +461,7 @@ static void play_animation(bool fromright) {
     (void)refresh();
     (void)sleep(1);
   }
-  message(WIN_MESSAGE);
+  message(WinMessage);
   (void)curs_set(0);
   (void)sleep(1);
 }
