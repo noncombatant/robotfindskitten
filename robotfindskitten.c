@@ -37,6 +37,21 @@
 
 static const char Version[] = "2.71828182";
 
+static const char Introduction[] =
+"By the illustrious Leonard Richardson (C) 1997, 2000.\n"
+"Written originally for the Nerth Pork robotfindskitten contest.\n"
+"\n"
+"In this game, you are robot (#). Your job is to find kitten. This task\n"
+"is complicated by the existence of various things which are not kitten.\n"
+"Robot must touch items to determine if they are kitten or not. The game\n"
+"ends when robotfindskitten. Alternatively, you may end the game by\n"
+"pressing the q key or a good old-fashioned Control-C.\n"
+"\n"
+"You can move using the arrow keys, the Emacs movement control sequences,\n"
+"the vi and Nethack movement keys, or the number keypad.\n"
+"\n"
+"Press any key to start.\n";
+
 static const size_t DefaultItemCount = 20;
 
 /* Bits returned from test. */
@@ -350,23 +365,11 @@ static void handle_resize(void) {
   draw_screen();
 }
 
-static void instructions(void) {
+static void show_introduction(void) {
   clear();
   move(0, 0);
   printw("robotfindskitten %s\n", Version);
-  printw(
-      "By the illustrious Leonard Richardson (C) 1997, 2000\n"
-      "Written originally for the Nerth Pork robotfindskitten contest\n\n"
-      "In this game, you are robot (#). Your job is to find kitten. This task\n"
-      "is complicated by the existence of various things which are not "
-      "kitten.\n"
-      "Robot must touch items to determine if they are kitten or not. The "
-      "game\n"
-      "ends when robotfindskitten. Alternatively, you may end the game by "
-      "hitting\n"
-      "the q key or a good old-fashioned Ctrl-C.\n\n"
-      "See the documentation for more information.\n\n"
-      "Press any key to start.\n");
+  printw(Introduction);
   refresh();
   if (getch() == KEY_RESIZE) {
     handle_resize();
@@ -597,7 +600,7 @@ int main(int count, char** arguments) {
   srandom(seed);
   initialize(item_count);
   if (!options_present) {
-    instructions();
+    show_introduction();
   }
   draw_screen();
   main_loop();
