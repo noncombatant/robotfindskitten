@@ -636,12 +636,7 @@ int main(int count, char** arguments) {
   state.options = DEFAULT_OPTIONS;
   srandom(seed);
   read_messages();
-
-  if (state.num_messages == 0) {
-    (void)fprintf(stderr, "No NKIs found.\n");
-    exit(EXIT_FAILURE);
-  }
-
+  assert(state.num_messages > 0);
   randomize_messages();
 
   if (item_count > (int)state.num_messages) {
