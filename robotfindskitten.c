@@ -587,7 +587,7 @@ int main(int count, char** arguments) {
   size_t item_count = 20;
 
   while (true) {
-    int option = getopt(count, arguments, "n:s:Vh");
+    int option = getopt(count, arguments, "n:s:h");
     if (-1 == option) {
       break;
     }
@@ -605,13 +605,10 @@ int main(int count, char** arguments) {
       case 's':
         seed = atoi(optarg);
         break;
-      case 'V':
-        (void)printf("robotfindskitten: %s\n", Version);
-        exit(EXIT_SUCCESS);
       case 'h':
       case '?':
       default:
-        (void)printf("usage: %s [-n nitems] [-s seed] [-V]\n", arguments[0]);
+        (void)printf("usage: %s [-n item-count] [-s seed]\n", arguments[0]);
         exit(EXIT_SUCCESS);
     }
   }
