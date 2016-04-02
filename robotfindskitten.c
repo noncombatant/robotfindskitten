@@ -142,7 +142,7 @@ static void add_message(const char* message) {
   state.num_messages++;
 }
 
-static void read_messages(void) {
+static void initialize_messages(void) {
   state.messages = NULL;
   state.num_messages = state.num_messages_alloc = 0;
   for (size_t i = 0; i < BOGUS; ++i) {
@@ -207,7 +207,7 @@ static void finish(int sig) {
   exit(sig);
 }
 
-static void init(size_t item_count) {
+static void initialize(size_t item_count) {
   size_t i, j;
 
   state.items = calloc(BOGUS + item_count, sizeof(screen_object));
@@ -626,14 +626,14 @@ int main(int count, char** arguments) {
 
   state.options = DEFAULT_OPTIONS;
   srandom(seed);
-  read_messages();
+  initialize_messages();
   assert(state.num_messages > 0);
   randomize_messages();
 
   if (item_count > state.num_messages) {
     item_count = state.num_messages;
   }
-  init(item_count);
+  initialize(item_count);
 
   instructions();
   draw_screen();
