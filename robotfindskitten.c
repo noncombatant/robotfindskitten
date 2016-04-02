@@ -164,97 +164,9 @@ static void add_message(char* msg, size_t len) {
   /*@=mustfreefresh@*/
 }
 
-static void read_file(char* fname) {
-  int fd;
-  char ch, *buff, *buff2;
-  size_t len, alloc;
-
-  len = 0;
-  alloc = 0;
-
-  /*@-mustfreefresh@ -usedef@*/
-  if ((fd = open(fname, O_RDONLY)) != -1) {
-    while (true) {
-      ssize_t ret = read(fd, &ch, 1);
-      if (ret < 0) /* an error */
-        break;
-      if (alloc <= len) { /* grow buff */
-        buff2 = malloc(alloc + MSG_ALLOC_CHUNK);
-        if (!buff2)
-          break;
-        (void)memcpy(buff2, buff, alloc);
-        if (alloc != 0)
-          free(buff);
-        buff = buff2;
-        alloc = alloc + MSG_ALLOC_CHUNK;
-      }
-      /* end of line/file */
-      if ((ret == 0) || (ch == '\n') || (ch == '\r')) {
-        /* ignore blank lines and comments */
-        if (len != 0 && (buff[0] != '#')) {
-          buff[len] = '\0';
-          add_message(buff, len + 1);
-        }
-        if (ret == 0) /* end of file */
-          break;
-        len = 0;
-      } else {
-        buff[len] = ch;
-        len++;
-      }
-    } /* end while ( true ) */
-    (void)close(fd);
-  }
-  if (alloc != 0)
-    free(buff);
-  /*@=mustfreefresh =usedef@*/
-}
-
-static void do_read_messages(char* dname) {
-  char* fname;
-  char* ext;
-  DIR* dir;
-  size_t len, plen;
-  struct dirent* dent;
-  struct stat sb;
-
-  /*@-mustfreefresh@ (this is a memory allocator) */
-  if (!(dir = opendir(dname)))
-    return;
-  plen = strlen(dname);
-  while ((dent = readdir(dir))) {
-    len = plen + strlen(dent->d_name) + 2;
-    if ((fname = malloc(len)) == NULL) {
-      (void)fprintf(stderr, "Cannot malloc for message storage.\n");
-      exit(EXIT_FAILURE);
-    } else {
-      (void)strcpy(fname, dname);
-      fname[plen] = '/';
-      (void)strcpy((fname + plen + 1), dent->d_name);
-      if (stat(fname, &sb) == 0 && ((sb.st_mode & S_IFREG) != 0)) {
-        ext = malloc(sizeof(char) * strlen(fname) + 1);
-        if (ext == NULL) {
-          (void)fprintf(stderr, "Cannot malloc for message storage.\n");
-          exit(EXIT_FAILURE);
-        }
-        (void)strncpy(ext, fname + (strlen(fname) - 3), strlen(fname));
-        if (strncmp(ext, NKI_EXT, 3) == 0) {
-          read_file(fname);
-        }
-        free(ext);
-      }
-      free(fname);
-    }
-  }
-  (void)closedir(dir);
-  /*@=mustfreefresh@*/
-}
-
 /*@-nullstate@*/
 static void read_messages(void) {
   unsigned int i;
-  char* home_dir;
-  char* user_nki_dir;
 
   /*@-mustfreefresh -mustfreeonly@*/
   state.messages = 0;
@@ -267,28 +179,6 @@ static void read_messages(void) {
   for (i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
     add_message(Messages[i], strlen(Messages[i]) + 1);
   }
-
-  do_read_messages(SYSTEM_NKI_DIR);
-
-  /* coverity[tainted_data] Safe, never handed to exec */
-  home_dir = getenv("HOME");
-  if (home_dir) {
-    size_t home_len = strlen(home_dir);
-    size_t user_nki_len = home_len + 1 + strlen(USER_NKI_DIR) + 1;
-    if (!(user_nki_dir = malloc(user_nki_len))) {
-      (void)fprintf(stderr, "Cannot malloc for user NKI directory.\n");
-      exit(EXIT_FAILURE);
-    }
-
-    (void)strcpy(user_nki_dir, home_dir);
-    user_nki_dir[home_len] = '/';
-    (void)strcpy(user_nki_dir + home_len + 1, USER_NKI_DIR);
-    do_read_messages(user_nki_dir);
-    (void)free(user_nki_dir);
-  }
-
-  do_read_messages("nki");
-  /*@=mustfreefresh =mustfreeonly@*/
 }
 
 static void randomize_messages(void) {
