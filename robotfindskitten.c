@@ -288,13 +288,10 @@ static void read_messages(void) {
 }
 
 static void randomize_messages(void) {
-  char* temp;
-  unsigned int i, j;
-
-  for (i = BOGUS; i < (state.num_messages - 1); i++) {
-    /*@i1@*/ j = i + (random() % (state.num_messages - i));
+  for (unsigned int i = BOGUS; i < (state.num_messages - 1); i++) {
+    /*@i1@*/ unsigned int j = i + (random() % (state.num_messages - i));
     if (i != j) {
-      temp = state.messages[i];
+      char* temp = state.messages[i];
       state.messages[i] = state.messages[j];
       state.messages[j] = temp;
     }
