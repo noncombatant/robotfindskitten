@@ -121,7 +121,7 @@ static char* Messages[] = {
 "Ah, the skirl of the pipes and the rustle of the silicon...",
 "Ah, the uniform of a Revolutionary-era minuteman.",
 "A huge pile of pancakes.",
-"A intact clay pigeon.",
+"An intact clay pigeon.",
 "Air.",
 "A jar of dehydrated water.",
 "A jar of lemon curd.",
