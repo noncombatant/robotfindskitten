@@ -1,4 +1,9 @@
 static char* Messages[] = {
+// Do not change these:
+"",
+"",
+
+// User-serviceable parts inside:
 "\"201 Kitten Verbs, Fully Conjugated\". You look for \"find\".",
 "3.14159... Pi is all over the place here...",
 "\"50 Years Among the Non-Kitten Items\", by Ann Droyd.",
@@ -939,3 +944,5 @@ static char* Messages[] = {
 "This seems like unconditional love. Sniff, sniff. ... Yep.",
 "A book of Captain Picard's management tips.",
 };
+
+#define MessageCount (sizeof(Messages) / sizeof(Messages[0]))

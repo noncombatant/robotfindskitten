@@ -111,7 +111,6 @@ static struct {
   unsigned int options;
   size_t item_count;
   size_t message_count;
-  size_t message_count_alloc;
   screen_object* items;
   char** messages;
 } GameState;
@@ -121,32 +120,9 @@ static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
 
-static void add_message(const char* message) {
-  static const size_t AllocationGrowth = 32;
-  if (GameState.message_count_alloc <= GameState.message_count) {
-    char** nmess =
-        calloc(GameState.message_count + AllocationGrowth, sizeof(char*));
-    GameState.message_count_alloc = GameState.message_count + AllocationGrowth;
-    memcpy(nmess, GameState.messages, GameState.message_count * sizeof(char*));
-    free(GameState.messages);
-    GameState.messages = nmess;
-  }
-  GameState.messages[GameState.message_count] = strdup(message);
-  GameState.message_count++;
-}
-
 static void initialize_messages(void) {
-  GameState.messages = NULL;
-  GameState.message_count = GameState.message_count_alloc = 0;
-  for (size_t i = 0; i < Bogus; ++i) {
-    add_message("");
-  }
-  for (size_t i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
-    add_message(Messages[i]);
-  }
-}
-
-static void randomize_messages(void) {
+  GameState.messages = Messages;
+  GameState.message_count = MessageCount;
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
     size_t j = i + (random() % (GameState.message_count - i));
     if (i != j) {
@@ -155,6 +131,9 @@ static void randomize_messages(void) {
       GameState.messages[j] = temp;
     }
   }
+  assert(GameState.message_count > 0);
+  assert(0 == strcmp("", GameState.messages[Robot]));
+  assert(0 == strcmp("", GameState.messages[Kitten]));
 }
 
 static int random_x(void) {
@@ -208,7 +187,10 @@ static void finish(int sig) {
 }
 
 static void initialize(size_t item_count) {
-  GameState.items = calloc(Bogus + item_count, sizeof(screen_object));
+  initialize_messages();
+  item_count = GameState.message_count ? item_count : GameState.message_count;
+  GameState.item_count = Bogus + item_count;
+  GameState.items = calloc(GameState.item_count, sizeof(screen_object));
 
   (void)signal(SIGINT, finish);
 
@@ -243,7 +225,7 @@ static void initialize(size_t item_count) {
     GameState.items[Kitten].x = random_x();
   } while (object_equal(GameState.items[Robot], GameState.items[Kitten]));
 
-  for (size_t i = Bogus; i < Bogus + item_count; ++i) {
+  for (size_t i = Bogus; i < GameState.item_count; ++i) {
     GameState.items[i].character = random_character();
     GameState.items[i].bold = random_bold();
     GameState.items[i].reverse = false;
@@ -265,7 +247,6 @@ static void initialize(size_t item_count) {
       }
     }
   }
-  GameState.item_count = Bogus + item_count;
 
   (void)start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
@@ -615,13 +596,7 @@ int main(int count, char** arguments) {
 
   GameState.options = OPTION_DISPLAY_INTRO;
   srandom(seed);
-  initialize_messages();
-  assert(GameState.message_count > 0);
-  randomize_messages();
-
-  initialize(item_count <= GameState.message_count ? item_count
-                                                   : GameState.message_count);
-
+  initialize(item_count);
   instructions();
   draw_screen();
   main_loop();
