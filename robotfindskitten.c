@@ -109,9 +109,9 @@ static struct {
   int lines;
   int cols;
   unsigned int options;
-  size_t num_items;
-  size_t num_messages;
-  size_t num_messages_alloc;
+  size_t item_count;
+  size_t message_count;
+  size_t message_count_alloc;
   screen_object* items;
   char** messages;
 } GameState;
@@ -123,20 +123,20 @@ static const size_t Bogus = 2;
 
 static void add_message(const char* message) {
   static const size_t MSGS_ALLOC_CHUNK = 32;
-  if (GameState.num_messages_alloc <= GameState.num_messages) {
-    char** nmess = calloc(GameState.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
-    GameState.num_messages_alloc = GameState.num_messages + MSGS_ALLOC_CHUNK;
-    memcpy(nmess, GameState.messages, GameState.num_messages * sizeof(char*));
+  if (GameState.message_count_alloc <= GameState.message_count) {
+    char** nmess = calloc(GameState.message_count + MSGS_ALLOC_CHUNK, sizeof(char*));
+    GameState.message_count_alloc = GameState.message_count + MSGS_ALLOC_CHUNK;
+    memcpy(nmess, GameState.messages, GameState.message_count * sizeof(char*));
     free(GameState.messages);
     GameState.messages = nmess;
   }
-  GameState.messages[GameState.num_messages] = strdup(message);
-  GameState.num_messages++;
+  GameState.messages[GameState.message_count] = strdup(message);
+  GameState.message_count++;
 }
 
 static void initialize_messages(void) {
   GameState.messages = NULL;
-  GameState.num_messages = GameState.num_messages_alloc = 0;
+  GameState.message_count = GameState.message_count_alloc = 0;
   for (size_t i = 0; i < Bogus; ++i) {
     add_message("");
   }
@@ -146,8 +146,8 @@ static void initialize_messages(void) {
 }
 
 static void randomize_messages(void) {
-  for (size_t i = Bogus; i < (GameState.num_messages - 1); i++) {
-    size_t j = i + (random() % (GameState.num_messages - i));
+  for (size_t i = Bogus; i < (GameState.message_count - 1); i++) {
+    size_t j = i + (random() % (GameState.message_count - i));
     if (i != j) {
       char* temp = GameState.messages[i];
       GameState.messages[i] = GameState.messages[j];
@@ -186,7 +186,7 @@ static bool object_equal(const screen_object a, const screen_object b) {
 }
 
 static size_t test(int y, int x, unsigned int* bnum) {
-  for (size_t i = 0; i < GameState.num_items; i++) {
+  for (size_t i = 0; i < GameState.item_count; i++) {
     if (GameState.items[i].x == x && GameState.items[i].y == y) {
       *bnum = i;
       if (Robot == i) {
@@ -264,7 +264,7 @@ static void initialize(size_t item_count) {
       }
     }
   }
-  GameState.num_items = Bogus + item_count;
+  GameState.item_count = Bogus + item_count;
 
   (void)start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
@@ -280,7 +280,7 @@ static void initialize(size_t item_count) {
 
     GameState.items[Robot].color = White;
     GameState.items[Kitten].color = random_color();
-    for (size_t i = Bogus; i < GameState.num_items; i++) {
+    for (size_t i = Bogus; i < GameState.item_count; i++) {
       GameState.items[i].color = random_color();
     }
   } else {
@@ -337,7 +337,7 @@ static void draw_screen() {
   }
   (void)move(0, 0);
   (void)printw("robotfindskitten %s\n\n", Version);
-  for (size_t i = 0; i < GameState.num_items; i++) {
+  for (size_t i = 0; i < GameState.item_count; i++) {
     (void)move(GameState.items[i].y, GameState.items[i].x);
     draw(&GameState.items[i]);
   }
@@ -350,7 +350,7 @@ static void draw_screen() {
 static void handle_resize(void) {
   int xbound = 0, ybound = 0;
   unsigned int i;
-  for (i = 0; i < GameState.num_items; i++) {
+  for (i = 0; i < GameState.item_count; i++) {
     if (GameState.items[i].x > xbound)
       xbound = GameState.items[i].x;
     if (GameState.items[i].y > ybound)
@@ -618,13 +618,10 @@ int main(int count, char** arguments) {
   GameState.options = OPTION_DISPLAY_INTRO;
   srandom(seed);
   initialize_messages();
-  assert(GameState.num_messages > 0);
+  assert(GameState.message_count > 0);
   randomize_messages();
 
-  if (item_count > GameState.num_messages) {
-    item_count = GameState.num_messages;
-  }
-  initialize(item_count);
+  initialize(item_count <= GameState.message_count ? item_count : GameState.message_count);
 
   instructions();
   draw_screen();
