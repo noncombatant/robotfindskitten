@@ -1,0 +1,61 @@
+.TH ROBOTFINDSKITTEN 6 "October 11, 2005"
+.\"
+.SH NAME
+robotfindskitten - help robot find kitten
+.\"
+.SH SYNOPSIS
+.B robotfindskitten
+[
+.BR -n number 
+] [
+.BR -s seed
+]
+.\"
+.SH DESCRIPTION
+In this game, you are robot
+.RB ( # ).
+Your job is to find kitten. This task is complicated by the existence of
+various things which are not kitten (collectively known as Non Kitten
+Items or NKIs). Robot must touch items to determine if they are kitten
+or not. The game ends when robot finds kitten.
+.P
+You can move robot with the arrow keys, the EMACS keys (^N, ^P, ^B and 
+^F for down, up, left and right), the keypad keys (all 8 directions), 
+and the nethack keys (all 8 directions; hjklyubn is left, down, up, 
+right, up-left, up-right, down-left and down-right).
+.P
+You can press Ctrl-L at any time to redraw the screen. You can press q
+at any time to quit.  A good old-fashioned Ctrl-C quits too.
+.\"
+.SH OPTIONS
+You can optionally specify the number of Non Kitten Items to use with
+the -s option. The default is 20.
+
+You can set the random-number seed, normally initialized from the
+system clock, with the -t option.  This may be useful for debugging.
+.\"
+.SH FILES
+.BR robotfindskitten (6)
+reads all of the files in the ~/.robotfindskitten and
+/usr/share/games/robotfindskitten
+directories. Each line of each file becomes the description of a Non 
+Kitten Item.
+.\"
+.SH ENVIRONMENT
+.BR robotfindskitten (6)
+uses the
+.B HOME
+environment variable to find the ~/.robotfindskitten directory.
+.\"
+.SH EXIT STATUS
+The exit status is
+.B 0
+if robot found kitten;
+.B 1
+if you quit or there was a problem; and the signal number if
+.BR robotfindskitten (6)
+exits gracefully due to a signal.
+.\"
+.SH AUTHOR
+Written by Alexey Toptygin <alexeyt@freeshell.org> based on sources by 
+Leonard Richardson and others.
