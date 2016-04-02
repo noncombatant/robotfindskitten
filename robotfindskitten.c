@@ -136,13 +136,11 @@ typedef struct {
   char** messages;
 } game_state;
 
-/* global state */
 static game_state state;
 
 static void add_message(char* msg, size_t len) {
   char *buff, **nmess;
 
-  /*@-mustfreefresh@ (this is a memory allocator) */
   if (state.num_messages_alloc <= state.num_messages) {
     nmess =
         calloc((size_t)state.num_messages + MSGS_ALLOC_CHUNK, sizeof(char*));
@@ -161,14 +159,11 @@ static void add_message(char* msg, size_t len) {
     state.messages[state.num_messages] = buff;
     state.num_messages++;
   }
-  /*@=mustfreefresh@*/
 }
 
-/*@-nullstate@*/
 static void read_messages(void) {
   unsigned int i;
 
-  /*@-mustfreefresh -mustfreeonly@*/
   state.messages = 0;
   state.num_messages = 0;
   state.num_messages_alloc = 0;
@@ -183,7 +178,7 @@ static void read_messages(void) {
 
 static void randomize_messages(void) {
   for (unsigned int i = BOGUS; i < (state.num_messages - 1); i++) {
-    /*@i1@*/ unsigned int j = i + (random() % (state.num_messages - i));
+    unsigned int j = i + (random() % (state.num_messages - i));
     if (i != j) {
       char* temp = state.messages[i];
       state.messages[i] = state.messages[j];
@@ -191,7 +186,6 @@ static void randomize_messages(void) {
     }
   }
 }
-/*@=nullstate@*/
 
 /* convenient macros */
 #define randx() (FRAME + (random() % (state.cols - FRAME * 2)))
@@ -239,13 +233,10 @@ static void finish(int sig) {
 static void init(unsigned int item_count) {
   unsigned int i, j;
 
-  /*@-mustfreefresh -mustfreeonly@*/
-  /* allocate memory */
   if (!(state.items = calloc(BOGUS + item_count, sizeof(screen_object)))) {
     fprintf(stderr, "Cannot malloc.\n");
     exit(EXIT_FAILURE);
   }
-  /*@=mustfreefresh =mustfreeonly@*/
 
   /* install exit handler */
   (void)signal(SIGINT, finish);
@@ -327,11 +318,9 @@ static void init(unsigned int item_count) {
   }
 }
 
-/*@-globstate@*/
 static void draw(const screen_object* o) {
   attr_t new;
 
-  /*@-nullpass@*/
   assert(curscr != NULL);
   if ((state.options & OPTION_HAS_COLOR) != 0) {
     new = COLOR_PAIR(o->color);
@@ -344,13 +333,11 @@ static void draw(const screen_object* o) {
     (void)attrset(new);
   }
   (void)addch(o->character);
-  /*@+nullpass@*/
 }
 
 static void message(char* message) {
   int y, x;
 
-  /*@-nullpass@*/
   getyx(curscr, y, x);
   if ((state.options & OPTION_HAS_COLOR) != 0) {
     attrset(COLOR_PAIR(WHITE));
@@ -361,13 +348,11 @@ static void message(char* message) {
   (void)printw("%.*s", state.cols, message);
   (void)move(y, x);
   (void)refresh();
-  /*@=nullpass@*/
 }
 
 static void draw_screen() {
   unsigned int i;
 
-  /*@-nullpass@*/
   if ((state.options & OPTION_HAS_COLOR) != 0)
     attrset(COLOR_PAIR(WHITE));
   (void)clear();
@@ -399,9 +384,7 @@ static void draw_screen() {
   if ((state.options & OPTION_HAS_COLOR) != 0)
     (void)attrset(COLOR_PAIR(WHITE));
   (void)refresh();
-  /*@=nullpass@*/
 }
-/*@=globstate@*/
 
 static void handle_resize(void) {
   int xbound = 0, ybound = 0;
