@@ -2,6 +2,9 @@
  *  Copyright (C) 2004-2005 Alexey Toptygin <alexeyt@freeshell.org>
  *  Based on sources by Leonard Richardson and others.
  *
+ *  Refactored (...defactored?) by Chris Palmer <https://noncombatant.org> on
+ *  1 April 2016.
+ *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2 of the License, or
@@ -17,22 +20,22 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <time.h>
-#ifndef S_SPLINT_S
-#include <unistd.h>
-#endif /* S_SPLINT_S */
+#include <sys/stat.h>
+
+#include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <string.h>
-#include <sys/stat.h>
 #include <getopt.h>
-#include <assert.h>
-
 #include <ncurses.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#include "messages.h"
 
 #define SYSTEM_NKI_DIR "/usr/share/games/robotfindskitten"
 #define USER_NKI_DIR ".robotfindskitten"
@@ -796,5 +799,3 @@ int main(int argc, char** argv) {
   finish(EXIT_SUCCESS);
   return EXIT_SUCCESS;
 }
-
-/* end */
