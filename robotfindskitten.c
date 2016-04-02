@@ -143,17 +143,12 @@ static void add_message(const char* message) {
 }
 
 static void read_messages(void) {
-  size_t i;
-
-  state.messages = 0;
-  state.num_messages = 0;
-  state.num_messages_alloc = 0;
-
-  for (i = 0; i < BOGUS; ++i) {
+  state.messages = NULL;
+  state.num_messages = state.num_messages_alloc = 0;
+  for (size_t i = 0; i < BOGUS; ++i) {
     add_message("");
   }
-
-  for (i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
+  for (size_t i = 0; i < sizeof(Messages) / sizeof(Messages[0]); ++i) {
     add_message(Messages[i]);
   }
 }
