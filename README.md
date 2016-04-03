@@ -143,6 +143,29 @@ you when implementing changes to robotfindskitten:
      arrays
   * `fopen`, `fread`, `fwrite`, `fclose`, and `getline`, for working with files
 
+A Note On Names
+---------------
+
+You’ll notice when reading the code that identifiers (variable names, function
+names, type names, et c.) seem to come from multiple naming conventions. That is
+because they do. The difference is that ‘legacy’ code (such as the C standard
+library, and the ncurses library) comes from the 1970s and 1980s, when memory
+was expensive and text editors did not have fancy features like autocomplete.
+Thus, you get these all-lowercase and pathologically terse names like `errno`
+(error number), `printf` (print formatted string), and `mvaddch` (move and add
+character). Memory was so expensive back then that early C compilers were not
+required to recognize more than the first 6 characters of an identifier, so all
+identifiers in a program had to be unique in their first 6 characters. Crazy!
+
+Now that computers are cheap and text editors are good, we can afford to write
+code that looks like it means something. Hence the ‘modern’ naming conventions
+used in this code:
+
+  * `GlobalName` (including functions like `EatFood` and `RemoveStuff`)
+  * `local_name` (including `struct` members and function-local variables)
+  * `i` and `j` for loop iterator variables (or other ‘obvious’ names, like
+    `Object o`)
+
 Further Reading
 ---------------
 
