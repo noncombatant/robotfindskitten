@@ -236,10 +236,12 @@ static void InitializeGame(size_t item_count) {
     while (true) {
       GameState.items[i].y = RandomY();
       GameState.items[i].x = RandomX();
-      if (ScreenObjectEqual(GameState.items[Robot], GameState.items[i]))
+      if (ScreenObjectEqual(GameState.items[Robot], GameState.items[i])) {
         continue;
-      if (ScreenObjectEqual(GameState.items[Kitten], GameState.items[i]))
+      }
+      if (ScreenObjectEqual(GameState.items[Kitten], GameState.items[i])) {
         continue;
+      }
       size_t j;
       for (j = 0; j < i; ++j) {
         if (ScreenObjectEqual(GameState.items[j], GameState.items[i])) {
