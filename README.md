@@ -156,5 +156,5 @@ workings of the `Makefile` and the `make` program.
 _lex & yacc_ (2nd edition) by Brown, Levine, and Mason describes how you can
 parse complex input languages in C.
 
-_Expert C Programming: Deep C Secrets_ by van der Linden is an amazingly great,
-and disconcerting, look into how C works (and, doesn’t work) under the hood.
+_Expert C Programming: Deep C Secrets_ by van der Linden is an amazingly great
+(and, disconcerting) look into how C works (and, doesn’t work) under the hood.
