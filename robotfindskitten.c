@@ -373,21 +373,19 @@ static void ShowIntroduction(void) {
 }
 
 static void PlayAnimation(bool approach_from_right) {
-  int i, animation_meet;
-  ScreenObject robot;
-  ScreenObject kitten;
-  chtype kitty;
-
   move(1, 0);
   clrtoeol();
-  animation_meet = (COLS / 2);
+  int animation_meet = (COLS / 2);
 
-  memcpy(&kitten, &GameState.items[Kitten], sizeof kitten);
-  memcpy(&robot, &GameState.items[Robot], sizeof robot);
+  ScreenObject kitten;
+  memcpy(&kitten, &GameState.items[Kitten], sizeof(kitten));
+
+  ScreenObject robot;
+  memcpy(&robot, &GameState.items[Robot], sizeof(robot));
   robot.reverse = true;
 
-  kitty = GameState.items[Kitten].character;
-  for (i = 4; i > 0; --i) {
+  chtype kitty = GameState.items[Kitten].character;
+  for (int i = 4; i > 0; --i) {
     GameState.items[Robot].character = (chtype)' ';
     GameState.items[Kitten].character = (chtype)' ';
 
