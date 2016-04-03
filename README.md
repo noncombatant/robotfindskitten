@@ -64,9 +64,9 @@ change the game play in ways you find fun. Here are some ideas:
 Basics Of Reading C
 -------------------
 
-I assume that most people reading this are most likely coming from a background
-programming in a very high-level language (VHLL) like Python, JavaScript, or
-Ruby. C is significantly different than those languages in several ways:
+I assume that most people reading this are coming from a background programming
+in a very high-level language (VHLL) like Python, JavaScript, or Ruby. C is
+significantly different than those languages in several ways:
 
   * Before you can run a program written in C, you must first _compile_
     (translate) the C code into code that your computer can understand.
@@ -95,7 +95,7 @@ programmer must declare the names and types of variables before using them, and
 that the types are much more specific and fiddly than the references-to-values
 style of Python or JavaScript.
 
-Most of the rest of C syntax will probably look familiar to JavaScript
+Most of the rest of C grammar will probably look familiar to JavaScript
 programmers, and somewhat familiar to Python programmers.
 
 You probably won’t understand everything right away, and that is OK. Like Robot,
@@ -104,7 +104,7 @@ you will find your Kitten with patience and in due time.
 Understanding The C Standard Library
 ------------------------------------
 
-So much for the syntax of C. What about the vocabulary? Like all programming
+So much for the grammar of C. What about the vocabulary? Like all programming
 languages, C has a standard library of functions and data types that programmers
 can use and build on. The standard library is documented in Unix’ _manual pages_
 (or “man pages” for short).
@@ -126,6 +126,13 @@ A good manual page to read might be `man 3 getopt`. `getopt` is a C library
 function that parses the command line, and on most systems the manual page
 includes an example of how to use it. (You can also read the use of `getopt` in
 `robotfindskitten.c`, of course.)
+
+Here are some more good manual pages to read (all in chapter 3), that might help
+you when implementing changes to robotfindskitten:
+
+  * `calloc` (and `free`), for creating (and destroying) dynamically-sized
+     arrays
+  * `fopen`, `fread`, `fwrite`, `fclose`, and `getline`, for working with files
 
 Further Reading
 ---------------
