@@ -30,7 +30,7 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "messages.h"
+#include "non_kitten_items.h"
 
 static const char Version[] = "2.71828182";
 static const char Introduction[] =
