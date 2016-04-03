@@ -84,9 +84,9 @@ significantly different than those languages in several ways:
     refers to. Given an `int* wump`, `*wump` evaluates to whatever `int` value
     `wump` is currently pointing to.
   * You can declare arrays, but the size of arrays is fixed at compile time (!).
-    `char wump[12];` means “`wump` is an array of 12 characters”. `int flarb[] =
-    { 1, 2, 3 };` means “`flarb` is an array of integers, and it is large enough
-    to hold the following items: ...”.
+    `char noodles[12];` means “`noodles` is an array of 12 characters”. `int
+    flarb[] = { 1, 2, 3 };` means “`flarb` is an array of integers, and it is
+    large enough to hold the following items: ...”.
   * Declarations may also come with various [_type
     qualifiers_](https://en.wikipedia.org/wiki/Type_qualifier), such as
     `static`, `const`, and so on. At first, you can mostly ignore them. Their
