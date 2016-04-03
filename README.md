@@ -7,11 +7,11 @@ many versions of the game (you can see them all at
 intended to be a decent learning vehicle for people new to the C programming
 language.
 
-It is based on a C implementation by Alexey Toptygin, but the implementation
-is simplified and re-cast in a modern style. It also sheds all vestiges of the
-GNU Autotools build system. In fact, I was motivated to do this because I
+I based this version on a C implementation by Alexey Toptygin, but simplified
+the implementation and re-cast it in a modern style. It also sheds all vestiges
+of the GNU Autotools build system. In fact, I was motivated to do this because I
 noticed that the build system boilerplate and infrastructure was 2 orders of
-magnitude larger than the code itself. That seemed wrong, so I fixed it.
+magnitude larger than the code itself. That seemed wrong.
 
 Building And Installing
 =======================
@@ -23,9 +23,10 @@ You will need a C compiler. On Mac OS X, get Xcode. On Ubuntu and other
 Debian-based systems, run `sudo apt-get install build-essential`. That should
 do the trick.
 
-robotfindskitten will not compile properly unless the ncurses headers are
-installed. They come with Xcode on Mac OS X, and you can install them on Ubuntu
-or other Debian-based systems with the command `apt-get install libncurses-dev`.
+robotfindskitten will not compile properly unless your system has the ncurses
+headers. They come with Xcode on Mac OS X, and you can install them on Ubuntu or
+other Debian-based systems with the command `sudo apt-get install
+libncurses-dev`.
 
 To compile, make sure you have the ncurses libraries installed, and simply
 type `make`. To run, type `./robotfindskitten`.
@@ -43,7 +44,7 @@ language, and writing code in the language. The best first book on programming
 in C is probably _The C Programming Language_ by Kernighan and Ritchie. (It is
 also one of the best technical books of any kind!) This implementation of
 robotfindskitten is intended to be as easy to read as C can be. (Let me know if
-I succeeded!) So, that covers the reading part of learning.
+I succeeded or failed!) So, that covers the reading part of learning.
 
 For the writing part of learning, try your hand at modifying robotfindskitten to
 change the game play in ways you find fun. Here are some ideas:
@@ -76,6 +77,12 @@ significantly different than those languages in several ways:
   * C distinguishes between _values_ of particular types and _pointers to
     values_. Pointers are declared with the `*` symbol; `int foo;` means “`foo`
     is an integer”, while `int* bar;` means “`bar` is a pointer to an integer”.
+  * The unary operator `&` (address-of) gets you a pointer to a value. Given an
+    `int foo`, the expression `&foo` evaluates to the address of `foo`, and the
+    type of this expression is `int*`.
+  * The unary operator `*` (dereference) follows an address to get the value it
+    refers to. Given an `int* wump`, `*wump` evaluates to whatever `int` value
+    `wump` is currently pointing to.
   * You can declare arrays, but the size of arrays is fixed at compile time (!).
     `char wump[12];` means “`wump` is an array of 12 characters”. `int flarb[] =
     { 1, 2, 3 };` means “`flarb` is an array of integers, and it is large enough
@@ -92,8 +99,7 @@ can learn from more authoritative sources like Kernighan and Ritchie.
 
 The biggest immediate difference between C and (e.g.) JavaScript is that the
 programmer must declare the names and types of variables before using them, and
-that the types are much more specific and fiddly than the references-to-values
-style of Python or JavaScript.
+that there are both value types and pointer types.
 
 Most of the rest of C grammar will probably look familiar to JavaScript
 programmers, and somewhat familiar to Python programmers.
