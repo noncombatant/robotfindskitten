@@ -32,8 +32,15 @@ compile properly unless your system has the `ncurses` header files. They come
 with Xcode on Mac OS X, and you can install them on Ubuntu or other Debian-based
 systems with the command `sudo apt-get install libncurses-dev`.
 
-To compile, make sure you have the ncurses libraries installed, and simply
-type `make`. To run, type `./robotfindskitten`.
+To build and run robotfindskitten, open a Terminal window and simply type
+`make`. To run, type `./robotfindskitten`. Like so:
+
+```
+git clone https://github.com/noncombatant/robotfindskitten.git
+cd robotfindskitten
+make
+./robotfindskitten
+```
 
 To install, do the preceeding and then copy the robotfindskitten binary to a
 place in your `$PATH`. A good place might be `$HOME/bin`, `/usr/games`, or
