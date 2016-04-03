@@ -954,6 +954,15 @@ static char* Messages[] = {
 "A pair of classic Doc Martens.",
 "A nearly-new Iron Maiden tour t-shirt. You save it.",
 "This is a wistful smile.",
+"...bath salts, or ‘bath salts’...?",
+"This appears to be the truth. (You’re pretty sure you can handle it.)",
+"You encounter an Egg McMuffin.",
+"A suspended 9th chord. Love that sound.",
+"This is the sine qua non of non-kitten items.",
+"Etched in stone, the words ‘TEXAS IRRITANDVM EST’.",
+"You find some NOS germanium capacitors. Now you can repair your fuzzing unit!",
+"A scratched scratching post. Kitten has been here.",
+"Kitten spoor.",
 };
 
 #define MessageCount (sizeof(Messages) / sizeof(Messages[0]))
