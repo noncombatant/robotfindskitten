@@ -13,6 +13,9 @@ of the GNU Autotools build system. In fact, I was motivated to do this because I
 noticed that the build system boilerplate and infrastructure was 2 orders of
 magnitude larger than the code itself. That seemed wrong.
 
+By perusing the Git history, you can see the steps I followed to get from
+Alexey’s original to this version.
+
 Building And Installing
 =======================
 
