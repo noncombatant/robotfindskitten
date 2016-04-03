@@ -26,10 +26,11 @@ You will need a C compiler. On Mac OS X, get Xcode. On Ubuntu and other
 Debian-based systems, run `sudo apt-get install build-essential`. That should
 do the trick.
 
-robotfindskitten will not compile properly unless your system has the ncurses
-headers. They come with Xcode on Mac OS X, and you can install them on Ubuntu or
-other Debian-based systems with the command `sudo apt-get install
-libncurses-dev`.
+The `ncurses` library is a C code library for manipulating the display in
+Terminal windows, and robotfindskitten depends on it. robotfindskitten will not
+compile properly unless your system has the `ncurses` header files. They come
+with Xcode on Mac OS X, and you can install them on Ubuntu or other Debian-based
+systems with the command `sudo apt-get install libncurses-dev`.
 
 To compile, make sure you have the ncurses libraries installed, and simply
 type `make`. To run, type `./robotfindskitten`.
