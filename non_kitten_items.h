@@ -959,10 +959,16 @@ static char* Messages[] = {
 "You encounter an Egg McMuffin.",
 "A suspended 9th chord. Love that sound.",
 "This is the sine qua non of non-kitten items.",
-"Etched in stone, the words ‘TEXAS IRRITANDVM EST’.",
+"Etched in stone, the words “TEXAS IRRITANDVM EST”.",
 "You find some NOS germanium capacitors. Now you can repair your fuzzing unit!",
 "A scratched scratching post. Kitten has been here.",
 "Kitten spoor.",
+"It’s you!",
+"Hey, there, lil buddy.",
+"Robots don’t drink root beer, but if they did, you’d drink this one.",
+"This appears to be a 21-sided die. The AD&D rules get weirder every year...",
+"A freshly-reinvented wheel that suddenly disappears.",
+"Nothing here but the wind.",
 };
 
 #define MessageCount (sizeof(Messages) / sizeof(Messages[0]))
