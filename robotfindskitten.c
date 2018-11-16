@@ -26,6 +26,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdnoreturn.h>
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -122,7 +123,7 @@ static void InitializeMessages(void) {
   GameState.messages = Messages;
   GameState.message_count = MessageCount;
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
-    size_t j = i + (random() % (GameState.message_count - i));
+    size_t j = i + ((size_t)random() % (GameState.message_count - i));
     if (i != j) {
       char* temp = GameState.messages[i];
       GameState.messages[i] = GameState.messages[j];
@@ -186,7 +187,7 @@ static TouchTestResult TouchTest(int y, int x, size_t* item_number) {
   return 0;
 }
 
-static void Finish(int signal) {
+static noreturn void Finish(int signal) {
   endwin();
   exit(signal);
 }
@@ -506,7 +507,6 @@ static void MainLoop(void) {
       case Key_QUIT:
       case Key_quit:
         Finish(EXIT_FAILURE);
-        break;
       case Key_RedrawScreen:
         RedrawScreen();
         break;
@@ -545,12 +545,8 @@ static void MainLoop(void) {
       case TouchTestResultKitten:
         PlayAnimation(approach_from_right);
         Finish(EXIT_SUCCESS);
-        break;
       case TouchTestResultNonKitten:
         ShowMessage(GameState.messages[item_number]);
-        break;
-      default:
-        ShowMessage("Well, that was unexpected...");
         break;
     }
   }
@@ -563,7 +559,7 @@ int main(int count, char* arguments[]) {
   setlocale(LC_ALL, NULL);
 #endif
 
-  int seed = time(0);
+  unsigned int seed = (unsigned int)time(0);
   size_t item_count = DefaultItemCount;
   bool options_present = false;
 
@@ -580,12 +576,12 @@ int main(int count, char* arguments[]) {
           fprintf(stderr, "Argument must be positive.\n");
           exit(EXIT_FAILURE);
         }
-        item_count = i;
+        item_count = (size_t)i;
         options_present = true;
         break;
       }
       case 's':
-        seed = atoi(optarg);
+        seed = (unsigned int)atoi(optarg);
         options_present = true;
         break;
       case 'h':

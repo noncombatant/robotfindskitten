@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -Werror -O0
+CFLAGS = -Weverything -Werror -O0 -ansi -pedantic -std=c11 -Wno-padded
 LDFLAGS = -lncurses
 
 robotfindskitten: robotfindskitten.c
