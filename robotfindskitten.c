@@ -34,24 +34,24 @@
 
 static const char Version[] = "2.71828182";
 static const char Introduction[] =
-"By the illustrious Leonard Richardson © 1997, 2000.\n"
-"Written originally for the Nerth Pork robotfindskitten contest.\n"
-"\n"
-"In this game, you are robot (#). Your job is to find kitten. This task\n"
-"is complicated by the existence of various things which are not kitten.\n"
-"Robot must touch items to determine if they are kitten or not. The game\n"
-"ends when robotfindskitten. Alternatively, you may end the game by\n"
-"pressing the q key or a good old-fashioned Control-C.\n"
-"\n"
-"You can move using the arrow keys, the Emacs movement control sequences,\n"
-"the vi and Nethack movement keys, or the number keypad.\n"
-"\n"
-"Press any key to start.\n";
+    "By the illustrious Leonard Richardson © 1997, 2000.\n"
+    "Written originally for the Nerth Pork robotfindskitten contest.\n"
+    "\n"
+    "In this game, you are robot (#). Your job is to find kitten. This task\n"
+    "is complicated by the existence of various things which are not kitten.\n"
+    "Robot must touch items to determine if they are kitten or not. The game\n"
+    "ends when robotfindskitten. Alternatively, you may end the game by\n"
+    "pressing the q key or a good old-fashioned Control-C.\n"
+    "\n"
+    "You can move using the arrow keys, the Emacs movement control sequences,\n"
+    "the vi and Nethack movement keys, or the number keypad.\n"
+    "\n"
+    "Press any key to start.\n";
 static const char WinMessage[] = "You found kitten! Way to go, robot!";
 
 static const size_t DefaultItemCount = 20;
 
-#define CONTROL(key) ((key) & 0x1f)
+#define CONTROL(key) ((key)&0x1f)
 
 typedef enum {
   NetHack_down = 'j',
@@ -216,7 +216,7 @@ static void InitializeGame(size_t item_count) {
   }
 
   GameState.items[Robot].character = (chtype)'#';
-  GameState.items[Robot].bold = false;    // We are a timid robot.
+  GameState.items[Robot].bold = false;  // We are a timid robot.
   GameState.items[Robot].reverse = false;
   GameState.items[Robot].y = RandomY();
   GameState.items[Robot].x = RandomX();
