@@ -20,16 +20,16 @@ Building And Installing
 =======================
 
 This version of robotfindskitten works on POSIX operating systems (tested on
-Ubuntu and Mac OS X) with reasonably modern C compilers (tested with Clang).
+Ubuntu and macOS) with reasonably modern C compilers (tested with Clang).
 
-You will need a C compiler. On Mac OS X, get Xcode. On Ubuntu and other
-Debian-based systems, run `sudo apt-get install build-essential`. That should
-do the trick.
+You will need a C compiler. On macOS, get Xcode. On Ubuntu and other
+Debian-based systems, run `sudo apt-get install build-essential`. That should do
+the trick.
 
 The `ncurses` library is a C code library for manipulating the display in
 Terminal windows, and robotfindskitten depends on it. robotfindskitten will not
 compile properly unless your system has the `ncurses` header files. They come
-with Xcode on Mac OS X, and you can install them on Ubuntu or other Debian-based
+with Xcode on macOS, and you can install them on Ubuntu or other Debian-based
 systems with the command `sudo apt-get install libncurses-dev`.
 
 To build and run robotfindskitten, open a Terminal window and simply type
@@ -126,9 +126,9 @@ languages, C has a standard library of functions and data types that programmers
 can use and build on. The standard library is documented in Unix’ _manual pages_
 (or “man pages” for short).
 
-On Mac OS X with Xcode, the manual pages are part of the Xcode install; on
-Ubuntu and other Debian-based systems, you may have to install a package to get
-them: `sudo apt-get install manpages-dev`.
+On macOS with Xcode, the manual pages are part of the Xcode install; on Ubuntu
+and other Debian-based systems, you may have to install a package to get them:
+`sudo apt-get install manpages-dev`.
 
 To read the manual page for a given function, open a Terminal window and type
 `man 3 foo` at the shell prompt, where `foo` is the name of a C library function
@@ -163,7 +163,7 @@ Thus, you get these all-lowercase and pathologically terse names like `errno`
 (error number), `printf` (print formatted string), and `mvaddch` (move and add
 character). Memory was so expensive back then that early C compilers were not
 required to recognize more than the first 6 characters of an identifier, so all
-identifiers in a program had to be unique in their first 6 characters. Crazy!
+identifiers in a program had to be unique in their first 6 characters. Bonkers!
 
 Now that computers are cheap and text editors are good, we can afford to write
 code that looks like it means something. Hence the ‘modern’ naming conventions
