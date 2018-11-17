@@ -139,7 +139,7 @@ static int RandomX(void) {
   return FrameThickness + (random() % (GameState.columns - FrameThickness * 2));
 }
 
-static int RandomY() {
+static int RandomY(void) {
   return HeaderSize + FrameThickness +
          (random() % (GameState.lines - HeaderSize - FrameThickness * 2));
 }
@@ -305,7 +305,7 @@ static void ShowMessage(const char* message) {
   refresh();
 }
 
-static void RedrawScreen() {
+static void RedrawScreen(void) {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
