@@ -177,9 +177,9 @@ used in this code:
 Further Reading
 ---------------
 
-[“Writing Programs With NCURSES” by Raymond and Ben-Halim]
-(http://invisible-island.net/ncurses/ncurses-intro.html) describes the ncurses
-library and how to use it, in depth.
+[“Writing Programs With NCURSES” by Raymond and
+Ben-Halim](http://invisible-island.net/ncurses/ncurses-intro.html) describes the
+ncurses library and how to use it, in depth.
 
 _The Practice Of Programming_ by Kernighan and Pike is an excellent discussion
 of ‘modern’ programming practices.
