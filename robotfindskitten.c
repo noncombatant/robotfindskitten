@@ -149,13 +149,13 @@ static bool RandomBold(void) {
 }
 
 static unsigned int RandomColor(void) {
-  return random() % 6 + 1;
+  return ((unsigned int)random()) % 6 + 1;
 }
 
 static chtype RandomCharacter(void) {
   chtype c;
   do {
-    c = (random() % ('~' - '!' + 1) + '!');
+    c = (chtype)((random() % ('~' - '!' + 1) + '!'));
   } while (c == '#');
   return c;
 }
