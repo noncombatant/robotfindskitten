@@ -21,14 +21,14 @@ This version of robotfindskitten works on POSIX operating systems (tested on
 Ubuntu and macOS) with reasonably modern C compilers (tested with Clang).
 
 You will need a C compiler. On macOS, get Xcode. On Ubuntu and other
-Debian-based systems, run `sudo apt-get install build-essential`. That should do
-the trick.
+Debian-based systems, run `sudo apt install build-essential`. That should do the
+trick.
 
 The `ncurses` library is a C code library for manipulating the display in
 Terminal windows, and robotfindskitten depends on it. robotfindskitten will not
 compile properly unless your system has the `ncurses` header files. They come
 with Xcode on macOS, and you can install them on Ubuntu or other Debian-based
-systems with the command `sudo apt-get install libncurses-dev`.
+systems with the command `sudo apt install libncurses-dev`.
 
 To build and run robotfindskitten, open a Terminal window and simply type
 `make`. To run, type `./robotfindskitten`. Like so:
@@ -123,7 +123,7 @@ can use and build on. The standard library is documented in Unix’ _manual page
 
 On macOS with Xcode, the manual pages are part of the Xcode install; on Ubuntu
 and other Debian-based systems, you may have to install a package to get them:
-`sudo apt-get install manpages-dev`.
+`sudo apt install manpages-dev`.
 
 To read the manual page for a given function, open a Terminal window and type
 `man 3 foo` at the shell prompt, where `foo` is the name of a C library function
