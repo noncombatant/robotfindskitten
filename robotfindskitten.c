@@ -35,23 +35,26 @@
 
 #include "non_kitten_items.h"
 
-static const char Version[] = "2.718281828";
 static const char Introduction[] =
-    "By the illustrious Leonard Richardson © 1997, 2000.\n"
+    "This is robotfindskitten, version 2.718281828, by the illustrious\n"
+    "Leonard Richardson © 1997, 2000.\n"
+    "\n"
     "Written originally for the Nerth Pork robotfindskitten contest.\n"
     "\n"
-    "In this game, you are robot (🤖). Your job is to find kitten. This "
-    "task\n"
-    "is complicated by the existence of various things which are not kitten.\n"
-    "Robot must touch items to determine if they are kitten or not. The game\n"
-    "ends when robotfindskitten. Alternatively, you may end the game by\n"
-    "pressing the Q key or a good old-fashioned Control-C.\n"
+    "In this game, you are Robot 🤖. Your job is to find Kitten 😺.\n"
+    "Inevitably, this task is complicated by the existence of various\n"
+    "items which are not Kitten. As in our world, things are rarely what\n"
+    "they seem, so you must touch them to determine whether they are\n"
+    "Kitten or not.\n"
+    "\n"
+    "The game ends when robotfindskitten. Alternatively, you may end\n"
+    "the game by pressing the Q key or a good old-fashioned Control-C.\n"
     "\n"
     "You can move using the arrow keys, the Emacs movement control sequences,\n"
     "the vi and NetHack movement keys, or the number keypad.\n"
     "\n"
     "Press any key to start.\n";
-static const char WinMessage[] = "You found kitten! Way to go, robot!";
+static const char WinMessage[] = "You found Kitten! Way to go, Robot!";
 
 static const size_t DefaultItemCount = 20;
 
@@ -358,7 +361,6 @@ static void HandleResize(void) {
 static void ShowIntroduction(void) {
   clear();
   move(0, 0);
-  printw("robotfindskitten %s\n", Version);
   printw(Introduction);
   refresh();
   if (getch() == KEY_RESIZE) {
@@ -378,7 +380,7 @@ static void PlayAnimation(bool approach_from_right) {
   ScreenObject robot;
   memcpy(&robot, &GameState.items[Robot], sizeof(robot));
 
-  char* kitty = GameState.items[Kitten].icon;
+  GameState.items[Robot].y = GameState.items[Kitten].y = 0;
   for (int i = 4; i > 0; --i) {
     printf("\a");
 
@@ -388,9 +390,7 @@ static void PlayAnimation(bool approach_from_right) {
     Draw(&GameState.items[Kitten]);
 
     GameState.items[Robot].icon = "🤖";
-    GameState.items[Robot].y = 0;
-    GameState.items[Kitten].icon = kitty;
-    GameState.items[Kitten].y = 0;
+    GameState.items[Kitten].icon = "😺";
     if (approach_from_right) {
       GameState.items[Robot].x = animation_meet + i;
       GameState.items[Kitten].x = animation_meet - i + 1;
@@ -575,7 +575,7 @@ int main(int count, char* arguments[]) {
       case 'h':
       case '?':
       default:
-        printf("usage: %s [-n item-count] [-s seed]\n", arguments[0]);
+        printf("Usage: %s [-n item-count] [-s seed]\n", arguments[0]);
         exit(EXIT_SUCCESS);
     }
   }
