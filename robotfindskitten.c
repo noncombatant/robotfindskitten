@@ -280,9 +280,8 @@ static void InitializeGame(size_t item_count) {
   }
 }
 
-// TODO: Remove this and just use printw (and in some cases, mvprintw).
 static void Draw(const ScreenObject* o) {
-  printw("%s", o->icon);
+  mvprintw(o->y, o->x, "%s", o->icon);
 }
 
 static void ShowMessage(const char* message) {
@@ -323,7 +322,6 @@ static void RedrawScreen(void) {
     attroff(attributes);
   }
   for (size_t i = 0; i < GameState.item_count; ++i) {
-    move(GameState.items[i].y, GameState.items[i].x);
     Draw(&GameState.items[i]);
   }
   move(GameState.items[Robot].y, GameState.items[Robot].x);
@@ -385,10 +383,8 @@ static void PlayAnimation(bool approach_from_right) {
     printf("\a");
 
     GameState.items[Robot].icon = " ";
-    move(GameState.items[Robot].y, GameState.items[Robot].x);
     Draw(&GameState.items[Robot]);
     GameState.items[Kitten].icon = " ";
-    move(GameState.items[Kitten].y, GameState.items[Kitten].x);
     Draw(&GameState.items[Kitten]);
 
     GameState.items[Robot].icon = "🤖";
@@ -403,14 +399,10 @@ static void PlayAnimation(bool approach_from_right) {
       GameState.items[Kitten].x = animation_meet + i;
     }
 
-    move(kitten.y, kitten.x);
     Draw(&kitten);
-    move(robot.y, robot.x);
     Draw(&robot);
 
-    move(GameState.items[Robot].y, GameState.items[Robot].x);
     Draw(&GameState.items[Robot]);
-    move(GameState.items[Kitten].y, GameState.items[Kitten].x);
     Draw(&GameState.items[Kitten]);
     move(GameState.items[Robot].y, GameState.items[Robot].x);
     refresh();
