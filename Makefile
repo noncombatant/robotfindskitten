@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Weverything -Werror -O2 -std=c17 -Wno-padded -Wno-poison-system-directories
+CFLAGS = -Weverything -Werror -O3 -std=c2x -Wno-padded -Wno-poison-system-directories -Wno-declaration-after-statement
 LDFLAGS = -lncurses
 
 robotfindskitten: robotfindskitten.c
