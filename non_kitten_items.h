@@ -1,4 +1,4 @@
-static char* Messages[] = {
+static const char* Messages[] = {
 // Do not change these:
 "",
 "",
@@ -969,6 +969,18 @@ static char* Messages[] = {
 "This appears to be a 21-sided die. The AD&D rules get weirder every year...",
 "A freshly-reinvented wheel that suddenly disappears.",
 "Nothing here but the wind.",
+"It’s a tracking cookie. It tastes like cardboard.",
+"You find an AddressSanitizer report. There was once a bug here.",
+"When you look under this rock, you don’t see kitten.",
+"In the grand scheme of things, it’s nothing. Don’t worry about it!",
+"A few scattered Unicode code points.",
+"A child’s birthday party is in progress. There is cake icing everywhere.",
+"You have no idea what this is. Neither does it?",
+"A wizard’s spellbook.",
+"Thieves’ tools.",
+"A lute. You twang it.",
+"When you wave this magic wand, it sputters.",
+"A rusted knight’s helmet. The visor squeaks when you lift it.",
 };
 
 #define MessageCount (sizeof(Messages) / sizeof(Messages[0]))

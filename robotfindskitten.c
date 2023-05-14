@@ -33,7 +33,7 @@
 
 #include "non_kitten_items.h"
 
-static const char Version[] = "2.71828182";
+static const char Version[] = "2.718281828";
 static const char Introduction[] =
     "By the illustrious Leonard Richardson © 1997, 2000.\n"
     "Written originally for the Nerth Pork robotfindskitten contest.\n"
@@ -123,7 +123,7 @@ static void InitializeMessages(void) {
   GameState.messages = Messages;
   GameState.message_count = MessageCount;
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
-    size_t j = i + ((size_t)random() % (GameState.message_count - i));
+    const size_t j = i + ((size_t)random() % (GameState.message_count - i));
     if (i != j) {
       char* temp = GameState.messages[i];
       GameState.messages[i] = GameState.messages[j];
@@ -338,8 +338,7 @@ static void RedrawScreen(void) {
 
 static void HandleResize(void) {
   int xbound = 0, ybound = 0;
-  unsigned int i;
-  for (i = 0; i < GameState.item_count; ++i) {
+  for (size_t i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x > xbound) {
       xbound = GameState.items[i].x;
     }
@@ -376,7 +375,7 @@ static void ShowIntroduction(void) {
 static void PlayAnimation(bool approach_from_right) {
   move(1, 0);
   clrtoeol();
-  int animation_meet = (COLS / 2);
+  const int animation_meet = (COLS / 2);
 
   ScreenObject kitten;
   memcpy(&kitten, &GameState.items[Kitten], sizeof(kitten));
