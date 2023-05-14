@@ -33,7 +33,7 @@
 
 #include "non_kitten_items.h"
 
-static const char Version[] = "2.71828182";
+static const char Version[] = "2.718281828";
 static const char Introduction[] =
     "By the illustrious Leonard Richardson © 1997, 2000.\n"
     "Written originally for the Nerth Pork robotfindskitten contest.\n"
@@ -45,7 +45,7 @@ static const char Introduction[] =
     "pressing the q key or a good old-fashioned Control-C.\n"
     "\n"
     "You can move using the arrow keys, the Emacs movement control sequences,\n"
-    "the vi and Nethack movement keys, or the number keypad.\n"
+    "the vi and NetHack movement keys, or the number keypad.\n"
     "\n"
     "Press any key to start.\n";
 static const char WinMessage[] = "You found kitten! Way to go, robot!";
@@ -54,7 +54,7 @@ static const size_t DefaultItemCount = 20;
 
 #define CONTROL(key) ((key)&0x1f)
 
-typedef enum {
+typedef enum KeyCode {
   NetHack_down = 'j',
   NetHack_DOWN = 'J',
   NetHack_up = 'k',
@@ -91,11 +91,11 @@ typedef enum {
   Key_QUIT = 'Q',
 } KeyCode;
 
-static const int HeaderSize = 2;
+static const int HeaderSize = 1;
 static const int FrameThickness = 1;
 static const unsigned int White = 7;
 
-typedef struct {
+typedef struct ScreenObject {
   int x;
   int y;
   unsigned int color;
@@ -104,14 +104,14 @@ typedef struct {
   chtype character;
 } ScreenObject;
 
-static struct {
+static struct GameState {
   int lines;
   int columns;
   bool screen_has_color;
   size_t item_count;
   size_t message_count;
   ScreenObject items[MessageCount];
-  char** messages;
+  const char** messages;
 } GameState;
 
 // Special indices in the GameState.items array.
@@ -119,20 +119,24 @@ static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
 
+static bool StringsEqual(const char* a, const char* b) {
+  return strcmp(a, b) == 0;
+}
+
 static void InitializeMessages(void) {
   GameState.messages = Messages;
   GameState.message_count = MessageCount;
+  assert(GameState.message_count > Bogus);
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
-    size_t j = i + ((size_t)random() % (GameState.message_count - i));
+    const size_t j = i + ((size_t)random() % (GameState.message_count - i));
     if (i != j) {
-      char* temp = GameState.messages[i];
+      const char* temp = GameState.messages[i];
       GameState.messages[i] = GameState.messages[j];
       GameState.messages[j] = temp;
     }
   }
-  assert(GameState.message_count > 0);
-  assert(0 == strcmp("", GameState.messages[Robot]));
-  assert(0 == strcmp("", GameState.messages[Kitten]));
+  assert(StringsEqual("", GameState.messages[Robot]));
+  assert(StringsEqual("", GameState.messages[Kitten]));
 }
 
 static int RandomX(void) {
@@ -153,14 +157,14 @@ static unsigned int RandomColor(void) {
 }
 
 static chtype RandomCharacter(void) {
-  chtype c;
+  chtype c = '\0';
   do {
     c = (chtype)((random() % ('~' - '!' + 1) + '!'));
   } while (c == '#');
   return c;
 }
 
-static bool ScreenObjectEqual(const ScreenObject a, const ScreenObject b) {
+static bool ScreenObjectsEqual(const ScreenObject a, const ScreenObject b) {
   return a.x == b.x && a.y == b.y;
 }
 
@@ -194,7 +198,6 @@ static noreturn void Finish(int signal) {
 
 static void InitializeGame(size_t item_count) {
   InitializeMessages();
-  item_count = GameState.message_count ? item_count : GameState.message_count;
   GameState.item_count = Bogus + item_count;
 
   signal(SIGINT, Finish);
@@ -228,7 +231,7 @@ static void InitializeGame(size_t item_count) {
   do {
     GameState.items[Kitten].y = RandomY();
     GameState.items[Kitten].x = RandomX();
-  } while (ScreenObjectEqual(GameState.items[Robot], GameState.items[Kitten]));
+  } while (ScreenObjectsEqual(GameState.items[Robot], GameState.items[Kitten]));
 
   for (size_t i = Bogus; i < GameState.item_count; ++i) {
     GameState.items[i].character = RandomCharacter();
@@ -237,15 +240,15 @@ static void InitializeGame(size_t item_count) {
     while (true) {
       GameState.items[i].y = RandomY();
       GameState.items[i].x = RandomX();
-      if (ScreenObjectEqual(GameState.items[Robot], GameState.items[i])) {
+      if (ScreenObjectsEqual(GameState.items[Robot], GameState.items[i])) {
         continue;
       }
-      if (ScreenObjectEqual(GameState.items[Kitten], GameState.items[i])) {
+      if (ScreenObjectsEqual(GameState.items[Kitten], GameState.items[i])) {
         continue;
       }
       size_t j;
       for (j = 0; j < i; ++j) {
-        if (ScreenObjectEqual(GameState.items[j], GameState.items[i])) {
+        if (ScreenObjectsEqual(GameState.items[j], GameState.items[i])) {
           break;
         }
       }
@@ -297,9 +300,9 @@ static void ShowMessage(const char* message) {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
-  move(1, 0);
+  move(0, 0);
   clrtoeol();
-  move(1, 0);
+  move(0, 0);
   printw("%.*s", GameState.columns, message);
   move(y, x);
   refresh();
@@ -314,17 +317,15 @@ static void RedrawScreen(void) {
   mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
   mvaddch(LINES - 1, 0, ACS_LLCORNER);
   mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
-  for (unsigned int i = 1; i < (unsigned int)COLS - 1; ++i) {
-    mvaddch(HeaderSize, (int)i, ACS_HLINE);
-    mvaddch(LINES - 1, (int)i, ACS_HLINE);
+  for (int i = 1; i < COLS - 1; ++i) {
+    mvaddch(HeaderSize, i, ACS_HLINE);
+    mvaddch(LINES - 1, i, ACS_HLINE);
   }
-  for (unsigned int i = FrameThickness + HeaderSize;
-       i < (unsigned int)LINES - 1; ++i) {
-    mvaddch((int)i, 0, ACS_VLINE);
-    mvaddch((int)i, COLS - 1, ACS_VLINE);
+  for (int i = FrameThickness + HeaderSize; i < LINES - 1; ++i) {
+    mvaddch(i, 0, ACS_VLINE);
+    mvaddch(i, COLS - 1, ACS_VLINE);
   }
   move(0, 0);
-  printw("robotfindskitten %s\n\n", Version);
   for (size_t i = 0; i < GameState.item_count; ++i) {
     move(GameState.items[i].y, GameState.items[i].x);
     Draw(&GameState.items[i]);
@@ -338,8 +339,7 @@ static void RedrawScreen(void) {
 
 static void HandleResize(void) {
   int xbound = 0, ybound = 0;
-  unsigned int i;
-  for (i = 0; i < GameState.item_count; ++i) {
+  for (size_t i = 0; i < GameState.item_count; ++i) {
     if (GameState.items[i].x > xbound) {
       xbound = GameState.items[i].x;
     }
@@ -374,9 +374,9 @@ static void ShowIntroduction(void) {
 }
 
 static void PlayAnimation(bool approach_from_right) {
-  move(1, 0);
+  move(0, 0);
   clrtoeol();
-  int animation_meet = (COLS / 2);
+  const int animation_meet = (COLS / 2);
 
   ScreenObject kitten;
   memcpy(&kitten, &GameState.items[Kitten], sizeof(kitten));
@@ -397,8 +397,8 @@ static void PlayAnimation(bool approach_from_right) {
 
     GameState.items[Robot].character = (chtype)'#';
     GameState.items[Kitten].character = kitty;
-    GameState.items[Robot].y = 1;
-    GameState.items[Kitten].y = 1;
+    GameState.items[Robot].y = 0;
+    GameState.items[Kitten].y = 0;
     if (approach_from_right) {
       GameState.items[Robot].x = animation_meet + i;
       GameState.items[Kitten].x = animation_meet - i + 1;
@@ -426,17 +426,17 @@ static void PlayAnimation(bool approach_from_right) {
 }
 
 static void MainLoop(void) {
-  int x, y;
-  size_t item_number = 0;
-  bool approach_from_right = false;
-
   while (true) {
-    int ch = getch();
-    if (0 == ch) {
+    const int ch = getch();
+    if (ch == 0) {
       break;
     }
-    y = GameState.items[Robot].y;
-    x = GameState.items[Robot].x;
+
+    int y = GameState.items[Robot].y;
+    int x = GameState.items[Robot].x;
+    size_t item_number = 0;
+    bool approach_from_right = false;
+
     switch (ch) {
       case NetHack_UP_LEFT:
       case NetHack_up_left:
@@ -564,19 +564,14 @@ int main(int count, char* arguments[]) {
   bool options_present = false;
 
   while (true) {
-    int option = getopt(count, arguments, "n:s:h");
+    const int option = getopt(count, arguments, "n:s:h");
     if (-1 == option) {
       break;
     }
 
     switch (option) {
       case 'n': {
-        int i = atoi(optarg);
-        if (i <= 0) {
-          fprintf(stderr, "Argument must be positive.\n");
-          exit(EXIT_FAILURE);
-        }
-        item_count = (size_t)i;
+        item_count = (size_t)abs(atoi(optarg));
         options_present = true;
         break;
       }

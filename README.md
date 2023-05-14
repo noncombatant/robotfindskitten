@@ -1,5 +1,4 @@
-About
-=====
+# About
 
 robotfindskitten is a very fun adventure game for robots and humans. There are
 many versions of the game (you can see them all at
@@ -16,8 +15,7 @@ magnitude larger than the code itself. That seemed wrong.
 By perusing the Git history, you can see the steps I followed to get from
 Alexey’s original to this version.
 
-Building And Installing
-=======================
+## Building And Installing
 
 This version of robotfindskitten works on POSIX operating systems (tested on
 Ubuntu and macOS) with reasonably modern C compilers (tested with Clang).
@@ -46,8 +44,7 @@ To install, do the preceeding and then copy the robotfindskitten binary to a
 place in your `$PATH`. A good place might be `$HOME/bin`, `/usr/games`, or
 `/usr/local/games`.
 
-Learning C With robotfindskitten
-================================
+## Learning C With robotfindskitten
 
 In my experience, a good way to learn how to learn a programming language is to
 interleave the activities of reading tutorial books, reading code written in the
@@ -73,8 +70,7 @@ change the game play in ways you find fun. Here are some ideas:
     rather than staying stationary
   * ...whatever else seems fun to you!
 
-Basics Of Reading C
--------------------
+### Basics Of Reading C
 
 I assume that most people reading this are coming from a background programming
 in a very high-level language (VHLL) like Python, JavaScript, or Ruby. C is
@@ -118,8 +114,7 @@ programmers, and somewhat familiar to Python programmers.
 You probably won’t understand everything right away, and that is OK. Like Robot,
 you will find your Kitten with patience and in due time.
 
-Understanding The C Standard Library
-------------------------------------
+### Understanding The C Standard Library
 
 So much for the grammar of C. What about the vocabulary? Like all programming
 languages, C has a standard library of functions and data types that programmers
@@ -151,8 +146,7 @@ you when implementing changes to robotfindskitten:
      arrays
   * `fopen`, `fread`, `fwrite`, `fclose`, and `getline`, for working with files
 
-A Note On Names
----------------
+### A Note On Names
 
 You’ll notice when reading the code that identifiers (variable names, function
 names, type names, et c.) seem to come from multiple naming conventions. That is
@@ -174,8 +168,7 @@ used in this code:
   * `i` and `j` for loop iterator variables (or other ‘obvious’ names, like
     `Object o`)
 
-Further Reading
----------------
+### Further Reading
 
 [“Writing Programs With NCURSES” by Raymond and
 Ben-Halim](http://invisible-island.net/ncurses/ncurses-intro.html) describes the

@@ -1,4 +1,4 @@
-static char* Messages[] = {
+static const char* Messages[] = {
 // Do not change these:
 "",
 "",
@@ -960,7 +960,7 @@ static char* Messages[] = {
 "A suspended 9th chord. Love that sound.",
 "This is the sine qua non of non-kitten items.",
 "Etched in stone, the words “TEXAS IRRITANDVM EST”.",
-"You find some NOS germanium capacitors. Now you can repair your fuzzing unit!",
+"You find some NOS germanium transistors. Now you can repair your fuzzing unit!",
 "A scratched scratching post. Kitten has been here.",
 "Kitten spoor.",
 "It’s you!",
@@ -969,6 +969,33 @@ static char* Messages[] = {
 "This appears to be a 21-sided die. The AD&D rules get weirder every year...",
 "A freshly-reinvented wheel that suddenly disappears.",
 "Nothing here but the wind.",
+"It’s a tracking cookie. It tastes like cardboard.",
+"You find an AddressSanitizer report. There was once a bug here.",
+"When you look under this rock, you don’t see kitten.",
+"In the grand scheme of things, it’s nothing. Don’t worry about it!",
+"A few scattered Unicode code points.",
+"A child’s birthday party is in progress. There is cake icing everywhere.",
+"You have no idea what this is. Neither does it?",
+"A wizard’s spellbook.",
+"Thieves’ tools.",
+"A lute. You twang it.",
+"When you wave this magic wand, it sputters.",
+"A rusted knight’s helmet. The visor squeaks when you lift it.",
+"Monk is here. They are serving tea.",
+"It’s the tritone substitution again.",
+"A solar-powered water desalinator.",
+"Well, it was delicious.",
+"A new type of Girl Scout cookie.",
+"Loose-leaf catnip, in a small cotton pouch. You save this for kitten.",
+"It would seem to be a lambda cube.",
+"You’re not sure this new top-level domain name was a good idea.",
+"A couple peanuts in their shells. You know a crow who would like this.",
+"A commemorative plaque celebrating that time you and Crow saved East St. Louis.",
+"A treatise on the middle voice. It reads well.",
+"The supine case. “Tam diu minime visu!”, you tell it.",
+"The Tao that can be told is not the eternal Tao. This must not be it, then.",
+"Doubt gnaws at you, but you press on.",
+"Just another opcode.",
 };
 
 #define MessageCount (sizeof(Messages) / sizeof(Messages[0]))
