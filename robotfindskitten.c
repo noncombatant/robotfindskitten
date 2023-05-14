@@ -116,7 +116,7 @@ static struct GameState {
   size_t item_count;
   Item items[ArrayCount(Messages)];
   size_t message_count;
-  const char** messages;
+  char** messages;
   size_t icon_count;
   char** icons;
 } GameState;
@@ -130,23 +130,6 @@ static bool StringsEqual(const char* a, const char* b) {
   return strcmp(a, b) == 0;
 }
 
-static void InitializeMessages(void) {
-  GameState.messages = Messages;
-  GameState.message_count = ArrayCount(Messages);
-  assert(GameState.message_count > Bogus);
-  for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
-    const size_t j = i + ((size_t)random() % (GameState.message_count - i));
-    if (i != j) {
-      const char* temp = GameState.messages[i];
-      GameState.messages[i] = GameState.messages[j];
-      GameState.messages[j] = temp;
-    }
-  }
-  assert(StringsEqual("", GameState.messages[Robot]));
-  assert(StringsEqual("", GameState.messages[Kitten]));
-}
-
-// TODO: Use this on Messages, too.
 static void ArrayShuffle(char** array, size_t count) {
   for (size_t i = 0; i < count - 1; ++i) {
     const size_t j = i + ((size_t)random() % (count - i));
@@ -209,7 +192,13 @@ static noreturn void Finish(int signal) {
 }
 
 static void InitializeGame(size_t item_count) {
-  InitializeMessages();
+  GameState.messages = Messages;
+  GameState.message_count = ArrayCount(Messages);
+  // Shuffle only the items after the Robot and Kitten placeholders:
+  ArrayShuffle(&GameState.messages[Bogus], GameState.message_count - Bogus);
+  assert(StringsEqual("", GameState.messages[Robot]));
+  assert(StringsEqual("", GameState.messages[Kitten]));
+
   GameState.item_count = Bogus + item_count;
 
   GameState.icons = Icons;
