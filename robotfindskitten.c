@@ -102,8 +102,6 @@ typedef struct ScreenObject {
   int x;
   int y;
   unsigned int color;
-  bool bold;
-  bool reverse;
   char* icon;
 } ScreenObject;
 
@@ -111,6 +109,7 @@ static struct GameState {
   int lines;
   int columns;
   bool screen_has_color;
+  unsigned int border_color;
   size_t item_count;
   ScreenObject items[ArrayCount(Messages)];
   size_t message_count;
@@ -146,7 +145,7 @@ static void InitializeMessages(void) {
 
 // TODO: Use this on Messages, too.
 static void ArrayShuffle(char** array, size_t count) {
-  for (size_t i = 0; i < count; ++i) {
+  for (size_t i = 0; i < count - 1; ++i) {
     const size_t j = i + ((size_t)random() % (count - i));
     char* temp = array[i];
     array[i] = array[j];
@@ -161,10 +160,6 @@ static int RandomX(void) {
 static int RandomY(void) {
   return HeaderSize + FrameThickness +
          (random() % (GameState.lines - HeaderSize - FrameThickness * 2));
-}
-
-static bool RandomBold(void) {
-  return random() % 2 ? true : false;
 }
 
 static unsigned int RandomColor(void) {
@@ -202,7 +197,7 @@ static TouchTestResult TouchTest(int y, int x, size_t* item_number) {
       }
     }
   }
-  return 0;
+  return TouchTestResultNone;
 }
 
 static noreturn void Finish(int signal) {
@@ -218,7 +213,7 @@ static void InitializeGame(size_t item_count) {
   GameState.icon_count = ArrayCount(Icons);
   ArrayShuffle(GameState.icons, GameState.icon_count);
 
-  signal(SIGINT, Finish);
+  GameState.border_color = RandomColor();
 
   // Set up (n)curses.
   initscr();
@@ -237,15 +232,11 @@ static void InitializeGame(size_t item_count) {
     exit(EXIT_FAILURE);
   }
 
-  GameState.items[Robot].icon = "🤖";
-  GameState.items[Robot].bold = false;  // We are a timid robot.
-  GameState.items[Robot].reverse = false;
+  GameState.items[Robot].icon = "🤖";  // We are a curious robot.
   GameState.items[Robot].y = RandomY();
   GameState.items[Robot].x = RandomX();
 
   GameState.items[Kitten].icon = RandomIcon();
-  GameState.items[Kitten].bold = RandomBold();
-  GameState.items[Kitten].reverse = false;
   do {
     GameState.items[Kitten].y = RandomY();
     GameState.items[Kitten].x = RandomX();
@@ -253,8 +244,6 @@ static void InitializeGame(size_t item_count) {
 
   for (size_t i = Bogus; i < GameState.item_count; ++i) {
     GameState.items[i].icon = RandomIcon();
-    GameState.items[i].bold = RandomBold();
-    GameState.items[i].reverse = false;
     while (true) {
       GameState.items[i].y = RandomY();
       GameState.items[i].x = RandomX();
@@ -288,27 +277,11 @@ static void InitializeGame(size_t item_count) {
     init_pair(6, COLOR_CYAN, COLOR_BLACK);
     init_pair(7, COLOR_WHITE, COLOR_BLACK);
     bkgd((chtype)COLOR_PAIR(White));
-
-    GameState.items[Robot].color = White;
-    GameState.items[Kitten].color = RandomColor();
-    for (size_t i = Bogus; i < GameState.item_count; ++i) {
-      GameState.items[i].color = RandomColor();
-    }
   }
 }
 
+// TODO: Remove this and just use printw (and in some cases, mvprintw).
 static void Draw(const ScreenObject* o) {
-  assert(curscr != NULL);
-  if (GameState.screen_has_color) {
-    attr_t new = COLOR_PAIR(o->color);
-    if (o->bold) {
-      new |= A_BOLD;
-    }
-    if (o->reverse) {
-      new |= A_REVERSE;
-    }
-    attrset(new);
-  }
   printw("%s", o->icon);
 }
 
@@ -327,8 +300,9 @@ static void ShowMessage(const char* message) {
 }
 
 static void RedrawScreen(void) {
+  const unsigned int attributes = COLOR_PAIR(GameState.border_color) | A_BOLD;
   if (GameState.screen_has_color) {
-    attrset(COLOR_PAIR(White));
+    attron(attributes);
   }
   clear();
   mvadd_wch(HeaderSize, 0, WACS_ULCORNER);
@@ -343,7 +317,11 @@ static void RedrawScreen(void) {
     mvadd_wch(i, 0, WACS_VLINE);
     mvadd_wch(i, COLS - 1, WACS_VLINE);
   }
+
   move(0, 0);
+  if (GameState.screen_has_color) {
+    attroff(attributes);
+  }
   for (size_t i = 0; i < GameState.item_count; ++i) {
     move(GameState.items[i].y, GameState.items[i].x);
     Draw(&GameState.items[i]);
@@ -401,7 +379,6 @@ static void PlayAnimation(bool approach_from_right) {
 
   ScreenObject robot;
   memcpy(&robot, &GameState.items[Robot], sizeof(robot));
-  robot.reverse = true;
 
   char* kitty = GameState.items[Kitten].icon;
   for (int i = 4; i > 0; --i) {
@@ -575,6 +552,8 @@ static void MainLoop(void) {
 }
 
 int main(int count, char* arguments[]) {
+  signal(SIGINT, Finish);
+
 #if defined(__APPLE__) && defined(__MACH__)
   setlocale(LC_ALL, "");
 #else
