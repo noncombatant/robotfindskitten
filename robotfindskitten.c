@@ -111,7 +111,7 @@ static struct {
   size_t item_count;
   size_t message_count;
   ScreenObject items[MessageCount];
-  char** messages;
+  const char** messages;
 } GameState;
 
 // Special indices in the GameState.items array.
@@ -125,7 +125,7 @@ static void InitializeMessages(void) {
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
     const size_t j = i + ((size_t)random() % (GameState.message_count - i));
     if (i != j) {
-      char* temp = GameState.messages[i];
+      const char* temp = GameState.messages[i];
       GameState.messages[i] = GameState.messages[j];
       GameState.messages[j] = temp;
     }
