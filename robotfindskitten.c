@@ -45,7 +45,7 @@ static const char Introduction[] =
     "pressing the q key or a good old-fashioned Control-C.\n"
     "\n"
     "You can move using the arrow keys, the Emacs movement control sequences,\n"
-    "the vi and Nethack movement keys, or the number keypad.\n"
+    "the vi and NetHack movement keys, or the number keypad.\n"
     "\n"
     "Press any key to start.\n";
 static const char WinMessage[] = "You found kitten! Way to go, robot!";
@@ -91,7 +91,7 @@ typedef enum KeyCode {
   Key_QUIT = 'Q',
 } KeyCode;
 
-static const int HeaderSize = 2;
+static const int HeaderSize = 1;
 static const int FrameThickness = 1;
 static const unsigned int White = 7;
 
@@ -300,9 +300,9 @@ static void ShowMessage(const char* message) {
   if (GameState.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
-  move(1, 0);
+  move(0, 0);
   clrtoeol();
-  move(1, 0);
+  move(0, 0);
   printw("%.*s", GameState.columns, message);
   move(y, x);
   refresh();
@@ -326,7 +326,6 @@ static void RedrawScreen(void) {
     mvaddch(i, COLS - 1, ACS_VLINE);
   }
   move(0, 0);
-  printw("robotfindskitten %s\n\n", Version);
   for (size_t i = 0; i < GameState.item_count; ++i) {
     move(GameState.items[i].y, GameState.items[i].x);
     Draw(&GameState.items[i]);
@@ -375,7 +374,7 @@ static void ShowIntroduction(void) {
 }
 
 static void PlayAnimation(bool approach_from_right) {
-  move(1, 0);
+  move(0, 0);
   clrtoeol();
   const int animation_meet = (COLS / 2);
 
@@ -398,8 +397,8 @@ static void PlayAnimation(bool approach_from_right) {
 
     GameState.items[Robot].character = (chtype)'#';
     GameState.items[Kitten].character = kitty;
-    GameState.items[Robot].y = 1;
-    GameState.items[Kitten].y = 1;
+    GameState.items[Robot].y = 0;
+    GameState.items[Kitten].y = 0;
     if (approach_from_right) {
       GameState.items[Robot].x = animation_meet + i;
       GameState.items[Kitten].x = animation_meet - i + 1;
@@ -427,17 +426,17 @@ static void PlayAnimation(bool approach_from_right) {
 }
 
 static void MainLoop(void) {
-  int x, y;
-  size_t item_number = 0;
-  bool approach_from_right = false;
-
   while (true) {
-    int ch = getch();
-    if (0 == ch) {
+    const int ch = getch();
+    if (ch == 0) {
       break;
     }
-    y = GameState.items[Robot].y;
-    x = GameState.items[Robot].x;
+
+    int y = GameState.items[Robot].y;
+    int x = GameState.items[Robot].x;
+    size_t item_number = 0;
+    bool approach_from_right = false;
+
     switch (ch) {
       case NetHack_UP_LEFT:
       case NetHack_up_left:
