@@ -54,7 +54,7 @@ static const size_t DefaultItemCount = 20;
 
 #define CONTROL(key) ((key)&0x1f)
 
-typedef enum {
+typedef enum KeyCode {
   NetHack_down = 'j',
   NetHack_DOWN = 'J',
   NetHack_up = 'k',
@@ -95,7 +95,7 @@ static const int HeaderSize = 2;
 static const int FrameThickness = 1;
 static const unsigned int White = 7;
 
-typedef struct {
+typedef struct ScreenObject {
   int x;
   int y;
   unsigned int color;
@@ -104,7 +104,7 @@ typedef struct {
   chtype character;
 } ScreenObject;
 
-static struct {
+static struct GameState {
   int lines;
   int columns;
   bool screen_has_color;
@@ -119,9 +119,14 @@ static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
 
+static bool StringsEqual(const char* a, const char* b) {
+  return strcmp(a, b) == 0;
+}
+
 static void InitializeMessages(void) {
   GameState.messages = Messages;
   GameState.message_count = MessageCount;
+  assert(GameState.message_count > Bogus);
   for (size_t i = Bogus; i < (GameState.message_count - 1); ++i) {
     const size_t j = i + ((size_t)random() % (GameState.message_count - i));
     if (i != j) {
@@ -130,9 +135,8 @@ static void InitializeMessages(void) {
       GameState.messages[j] = temp;
     }
   }
-  assert(GameState.message_count > 0);
-  assert(0 == strcmp("", GameState.messages[Robot]));
-  assert(0 == strcmp("", GameState.messages[Kitten]));
+  assert(StringsEqual("", GameState.messages[Robot]));
+  assert(StringsEqual("", GameState.messages[Kitten]));
 }
 
 static int RandomX(void) {
@@ -153,14 +157,14 @@ static unsigned int RandomColor(void) {
 }
 
 static chtype RandomCharacter(void) {
-  chtype c;
+  chtype c = '\0';
   do {
     c = (chtype)((random() % ('~' - '!' + 1) + '!'));
   } while (c == '#');
   return c;
 }
 
-static bool ScreenObjectEqual(const ScreenObject a, const ScreenObject b) {
+static bool ScreenObjectsEqual(const ScreenObject a, const ScreenObject b) {
   return a.x == b.x && a.y == b.y;
 }
 
@@ -194,7 +198,6 @@ static noreturn void Finish(int signal) {
 
 static void InitializeGame(size_t item_count) {
   InitializeMessages();
-  item_count = GameState.message_count ? item_count : GameState.message_count;
   GameState.item_count = Bogus + item_count;
 
   signal(SIGINT, Finish);
@@ -228,7 +231,7 @@ static void InitializeGame(size_t item_count) {
   do {
     GameState.items[Kitten].y = RandomY();
     GameState.items[Kitten].x = RandomX();
-  } while (ScreenObjectEqual(GameState.items[Robot], GameState.items[Kitten]));
+  } while (ScreenObjectsEqual(GameState.items[Robot], GameState.items[Kitten]));
 
   for (size_t i = Bogus; i < GameState.item_count; ++i) {
     GameState.items[i].character = RandomCharacter();
@@ -237,15 +240,15 @@ static void InitializeGame(size_t item_count) {
     while (true) {
       GameState.items[i].y = RandomY();
       GameState.items[i].x = RandomX();
-      if (ScreenObjectEqual(GameState.items[Robot], GameState.items[i])) {
+      if (ScreenObjectsEqual(GameState.items[Robot], GameState.items[i])) {
         continue;
       }
-      if (ScreenObjectEqual(GameState.items[Kitten], GameState.items[i])) {
+      if (ScreenObjectsEqual(GameState.items[Kitten], GameState.items[i])) {
         continue;
       }
       size_t j;
       for (j = 0; j < i; ++j) {
-        if (ScreenObjectEqual(GameState.items[j], GameState.items[i])) {
+        if (ScreenObjectsEqual(GameState.items[j], GameState.items[i])) {
           break;
         }
       }
@@ -314,14 +317,13 @@ static void RedrawScreen(void) {
   mvaddch(HeaderSize, COLS - 1, ACS_URCORNER);
   mvaddch(LINES - 1, 0, ACS_LLCORNER);
   mvaddch(LINES - 1, COLS - 1, ACS_LRCORNER);
-  for (unsigned int i = 1; i < (unsigned int)COLS - 1; ++i) {
-    mvaddch(HeaderSize, (int)i, ACS_HLINE);
-    mvaddch(LINES - 1, (int)i, ACS_HLINE);
+  for (int i = 1; i < COLS - 1; ++i) {
+    mvaddch(HeaderSize, i, ACS_HLINE);
+    mvaddch(LINES - 1, i, ACS_HLINE);
   }
-  for (unsigned int i = FrameThickness + HeaderSize;
-       i < (unsigned int)LINES - 1; ++i) {
-    mvaddch((int)i, 0, ACS_VLINE);
-    mvaddch((int)i, COLS - 1, ACS_VLINE);
+  for (int i = FrameThickness + HeaderSize; i < LINES - 1; ++i) {
+    mvaddch(i, 0, ACS_VLINE);
+    mvaddch(i, COLS - 1, ACS_VLINE);
   }
   move(0, 0);
   printw("robotfindskitten %s\n\n", Version);
@@ -563,19 +565,14 @@ int main(int count, char* arguments[]) {
   bool options_present = false;
 
   while (true) {
-    int option = getopt(count, arguments, "n:s:h");
+    const int option = getopt(count, arguments, "n:s:h");
     if (-1 == option) {
       break;
     }
 
     switch (option) {
       case 'n': {
-        int i = atoi(optarg);
-        if (i <= 0) {
-          fprintf(stderr, "Argument must be positive.\n");
-          exit(EXIT_FAILURE);
-        }
-        item_count = (size_t)i;
+        item_count = (size_t)abs(atoi(optarg));
         options_present = true;
         break;
       }
