@@ -104,7 +104,6 @@ static const unsigned int White = 7;
 typedef struct Item {
   int x;
   int y;
-  unsigned int color;
   char* icon;
 } Item;
 
@@ -200,6 +199,17 @@ static void InitializeGame(size_t non_kitten_count) {
   cbreak();
   intrflush(stdscr, false);
   keypad(stdscr, true);
+  start_color();
+  if (has_colors() && (COLOR_PAIRS > 7)) {
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
+    init_pair(4, COLOR_BLUE, COLOR_BLACK);
+    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
+    init_pair(6, COLOR_CYAN, COLOR_BLACK);
+    init_pair(7, COLOR_WHITE, COLOR_BLACK);
+    bkgd((chtype)COLOR_PAIR(White));
+  }
 
   if (((LINES - HeaderSize - FrameThickness) * COLS) <
       (int)(non_kitten_count + 2)) {
@@ -237,18 +247,6 @@ static void InitializeGame(size_t non_kitten_count) {
         break;
       }
     }
-  }
-
-  start_color();
-  if (has_colors() && (COLOR_PAIRS > 7)) {
-    init_pair(1, COLOR_GREEN, COLOR_BLACK);
-    init_pair(2, COLOR_RED, COLOR_BLACK);
-    init_pair(3, COLOR_YELLOW, COLOR_BLACK);
-    init_pair(4, COLOR_BLUE, COLOR_BLACK);
-    init_pair(5, COLOR_MAGENTA, COLOR_BLACK);
-    init_pair(6, COLOR_CYAN, COLOR_BLACK);
-    init_pair(7, COLOR_WHITE, COLOR_BLACK);
-    bkgd((chtype)COLOR_PAIR(White));
   }
 }
 
