@@ -60,6 +60,8 @@ static const size_t DefaultItemCount = 20;
 
 #define CONTROL(key) ((key)&0x1f)
 
+#define COUNT(a) (sizeof((a)) / sizeof((a)[0]))
+
 typedef enum KeyCode {
   NetHack_down = 'j',
   NetHack_DOWN = 'J',
@@ -108,20 +110,20 @@ typedef struct Item {
   char* icon;
 } Item;
 
-static struct GameState {
+static struct Game {
   int lines;
   int columns;
   bool screen_has_color;
   unsigned int border_color;
   size_t item_count;
-  Item items[ArrayCount(Messages)];
+  Item items[COUNT(Messages)];
   size_t message_count;
   char** messages;
   size_t icon_count;
   char** icons;
-} GameState;
+} Game;
 
-// Special indices in the GameState.items array.
+// Special indices in the Game.items array.
 static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
@@ -130,7 +132,7 @@ static bool StringsEqual(const char* a, const char* b) {
   return strcmp(a, b) == 0;
 }
 
-static void ArrayShuffle(char** array, size_t count) {
+static void Shuffle(char** array, size_t count) {
   for (size_t i = 0; i < count - 1; ++i) {
     const size_t j = i + ((size_t)random() % (count - i));
     char* temp = array[i];
@@ -139,23 +141,23 @@ static void ArrayShuffle(char** array, size_t count) {
   }
 }
 
-static int RandomX(void) {
-  return FrameThickness + (random() % (GameState.columns - FrameThickness * 2));
+static int GetRandomX(void) {
+  return FrameThickness + (random() % (Game.columns - FrameThickness * 2));
 }
 
-static int RandomY(void) {
+static int GetRandomY(void) {
   return HeaderSize + FrameThickness +
-         (random() % (GameState.lines - HeaderSize - FrameThickness * 2));
+         (random() % (Game.lines - HeaderSize - FrameThickness * 2));
 }
 
-static unsigned int RandomColor(void) {
+static unsigned int GetRandomColor(void) {
   return ((unsigned int)random()) % 6 + 1;
 }
 
-static char* RandomIcon(void) {
+static char* GetRandomIcon(void) {
   static size_t previous = 0;
   char* r = Icons[previous];
-  previous = (previous + 1) % ArrayCount(Icons);
+  previous = (previous + 1) % COUNT(Icons);
   return r;
 }
 
@@ -171,8 +173,8 @@ typedef enum {
 } TouchTestResult;
 
 static TouchTestResult TouchTest(int y, int x, size_t* item_number) {
-  for (size_t i = 0; i < GameState.item_count; ++i) {
-    if (GameState.items[i].x == x && GameState.items[i].y == y) {
+  for (size_t i = 0; i < Game.item_count; ++i) {
+    if (Game.items[i].x == x && Game.items[i].y == y) {
       *item_number = i;
       if (Robot == i) {
         return TouchTestResultRobot;
@@ -192,20 +194,21 @@ static noreturn void Finish(int signal) {
 }
 
 static void InitializeGame(size_t item_count) {
-  GameState.messages = Messages;
-  GameState.message_count = ArrayCount(Messages);
+  Game.messages = Messages;
+  Game.message_count = COUNT(Messages);
   // Shuffle only the items after the Robot and Kitten placeholders:
-  ArrayShuffle(&GameState.messages[Bogus], GameState.message_count - Bogus);
-  assert(StringsEqual("", GameState.messages[Robot]));
-  assert(StringsEqual("", GameState.messages[Kitten]));
+  Shuffle(&Game.messages[Bogus], Game.message_count - Bogus);
+  // Ensure that we did that correctly:
+  assert(StringsEqual("", Game.messages[Robot]));
+  assert(StringsEqual("", Game.messages[Kitten]));
 
-  GameState.item_count = Bogus + item_count;
+  Game.item_count = Bogus + item_count;
 
-  GameState.icons = Icons;
-  GameState.icon_count = ArrayCount(Icons);
-  ArrayShuffle(GameState.icons, GameState.icon_count);
+  Game.icons = Icons;
+  Game.icon_count = COUNT(Icons);
+  Shuffle(Game.icons, Game.icon_count);
 
-  GameState.border_color = RandomColor();
+  Game.border_color = GetRandomColor();
 
   // Set up (n)curses.
   initscr();
@@ -215,37 +218,37 @@ static void InitializeGame(size_t item_count) {
   intrflush(stdscr, false);
   keypad(stdscr, true);
 
-  GameState.lines = LINES;
-  GameState.columns = COLS;
-  if (((GameState.lines - HeaderSize - FrameThickness) * GameState.columns) <
+  Game.lines = LINES;
+  Game.columns = COLS;
+  if (((Game.lines - HeaderSize - FrameThickness) * Game.columns) <
       (int)(item_count + 2)) {
     endwin();
     fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
   }
 
-  GameState.items[Robot].icon = "🤖";  // We are a curious robot.
-  GameState.items[Robot].y = RandomY();
-  GameState.items[Robot].x = RandomX();
+  Game.items[Robot].icon = "🤖";  // We are a curious robot.
+  Game.items[Robot].y = GetRandomY();
+  Game.items[Robot].x = GetRandomX();
 
-  GameState.items[Kitten].icon = RandomIcon();
+  Game.items[Kitten].icon = GetRandomIcon();
   do {
-    GameState.items[Kitten].y = RandomY();
-    GameState.items[Kitten].x = RandomX();
-  } while (ItemsCoincide(&GameState.items[Robot], &GameState.items[Kitten]));
+    Game.items[Kitten].y = GetRandomY();
+    Game.items[Kitten].x = GetRandomX();
+  } while (ItemsCoincide(&Game.items[Robot], &Game.items[Kitten]));
 
-  for (size_t i = Bogus; i < GameState.item_count; ++i) {
-    GameState.items[i].icon = RandomIcon();
+  for (size_t i = Bogus; i < Game.item_count; ++i) {
+    Game.items[i].icon = GetRandomIcon();
     while (true) {
-      GameState.items[i].y = RandomY();
-      GameState.items[i].x = RandomX();
-      if (ItemsCoincide(&GameState.items[Robot], &GameState.items[i]) ||
-          ItemsCoincide(&GameState.items[Kitten], &GameState.items[i])) {
+      Game.items[i].y = GetRandomY();
+      Game.items[i].x = GetRandomX();
+      if (ItemsCoincide(&Game.items[Robot], &Game.items[i]) ||
+          ItemsCoincide(&Game.items[Kitten], &Game.items[i])) {
         continue;
       }
       size_t j;
       for (j = 0; j < i; ++j) {
-        if (ItemsCoincide(&GameState.items[j], &GameState.items[i])) {
+        if (ItemsCoincide(&Game.items[j], &Game.items[i])) {
           break;
         }
       }
@@ -255,10 +258,10 @@ static void InitializeGame(size_t item_count) {
     }
   }
 
-  GameState.screen_has_color = false;
+  Game.screen_has_color = false;
   start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
-    GameState.screen_has_color = true;
+    Game.screen_has_color = true;
     init_pair(1, COLOR_GREEN, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -270,26 +273,26 @@ static void InitializeGame(size_t item_count) {
   }
 }
 
-static void ItemDraw(const Item* o) {
+static void DrawItem(const Item* o) {
   mvprintw(o->y, o->x, "%s", o->icon);
 }
 
-static void MessageDraw(const char* message) {
+static void DrawMessage(const char* message) {
   int y, x;
   getyx(curscr, y, x);
-  if (GameState.screen_has_color) {
+  if (Game.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
   move(0, 0);
   clrtoeol();
-  mvprintw(0, 0, "%.*s", GameState.columns, message);
+  mvprintw(0, 0, "%.*s", Game.columns, message);
   move(y, x);
   refresh();
 }
 
 static void RedrawScreen(void) {
-  const unsigned int attributes = COLOR_PAIR(GameState.border_color) | A_BOLD;
-  if (GameState.screen_has_color) {
+  const unsigned int attributes = COLOR_PAIR(Game.border_color) | A_BOLD;
+  if (Game.screen_has_color) {
     attron(attributes);
   }
   clear();
@@ -307,14 +310,14 @@ static void RedrawScreen(void) {
   }
 
   move(0, 0);
-  if (GameState.screen_has_color) {
+  if (Game.screen_has_color) {
     attroff(attributes);
   }
-  for (size_t i = 0; i < GameState.item_count; ++i) {
-    ItemDraw(&GameState.items[i]);
+  for (size_t i = 0; i < Game.item_count; ++i) {
+    DrawItem(&Game.items[i]);
   }
-  move(GameState.items[Robot].y, GameState.items[Robot].x);
-  if (GameState.screen_has_color) {
+  move(Game.items[Robot].y, Game.items[Robot].x);
+  if (Game.screen_has_color) {
     attrset(COLOR_PAIR(White));
   }
   refresh();
@@ -322,12 +325,12 @@ static void RedrawScreen(void) {
 
 static void HandleResize(void) {
   int xbound = 0, ybound = 0;
-  for (size_t i = 0; i < GameState.item_count; ++i) {
-    if (GameState.items[i].x > xbound) {
-      xbound = GameState.items[i].x;
+  for (size_t i = 0; i < Game.item_count; ++i) {
+    if (Game.items[i].x > xbound) {
+      xbound = Game.items[i].x;
     }
-    if (GameState.items[i].y > ybound) {
-      ybound = GameState.items[i].y;
+    if (Game.items[i].y > ybound) {
+      ybound = Game.items[i].y;
     }
   }
 
@@ -339,8 +342,8 @@ static void HandleResize(void) {
     exit(EXIT_FAILURE);
   }
 
-  GameState.lines = LINES;
-  GameState.columns = COLS;
+  Game.lines = LINES;
+  Game.columns = COLS;
   RedrawScreen();
 }
 
@@ -361,40 +364,40 @@ static void PlayAnimation(bool approach_from_right) {
   const int animation_meet = (COLS / 2);
 
   Item kitten;
-  memcpy(&kitten, &GameState.items[Kitten], sizeof(kitten));
+  memcpy(&kitten, &Game.items[Kitten], sizeof(kitten));
 
   Item robot;
-  memcpy(&robot, &GameState.items[Robot], sizeof(robot));
+  memcpy(&robot, &Game.items[Robot], sizeof(robot));
 
-  GameState.items[Robot].y = GameState.items[Kitten].y = 0;
+  Game.items[Robot].y = Game.items[Kitten].y = 0;
   for (int i = 4; i > 0; --i) {
     printf("\a");
 
-    GameState.items[Robot].icon = " ";
-    ItemDraw(&GameState.items[Robot]);
-    GameState.items[Kitten].icon = " ";
-    ItemDraw(&GameState.items[Kitten]);
+    Game.items[Robot].icon = " ";
+    DrawItem(&Game.items[Robot]);
+    Game.items[Kitten].icon = " ";
+    DrawItem(&Game.items[Kitten]);
 
-    GameState.items[Robot].icon = "🤖";
-    GameState.items[Kitten].icon = "😺";
+    Game.items[Robot].icon = "🤖";
+    Game.items[Kitten].icon = "😺";
     if (approach_from_right) {
-      GameState.items[Robot].x = animation_meet + i;
-      GameState.items[Kitten].x = animation_meet - i + 1;
+      Game.items[Robot].x = animation_meet + i;
+      Game.items[Kitten].x = animation_meet - i + 1;
     } else {
-      GameState.items[Robot].x = animation_meet - i + 1;
-      GameState.items[Kitten].x = animation_meet + i;
+      Game.items[Robot].x = animation_meet - i + 1;
+      Game.items[Kitten].x = animation_meet + i;
     }
 
-    ItemDraw(&kitten);
-    ItemDraw(&robot);
+    DrawItem(&kitten);
+    DrawItem(&robot);
 
-    ItemDraw(&GameState.items[Robot]);
-    ItemDraw(&GameState.items[Kitten]);
-    move(GameState.items[Robot].y, GameState.items[Robot].x);
+    DrawItem(&Game.items[Robot]);
+    DrawItem(&Game.items[Kitten]);
+    move(Game.items[Robot].y, Game.items[Robot].x);
     refresh();
     sleep(1);
   }
-  MessageDraw(WinMessage);
+  DrawMessage(WinMessage);
   curs_set(0);
   sleep(1);
 }
@@ -406,8 +409,8 @@ static void MainLoop(void) {
       break;
     }
 
-    int y = GameState.items[Robot].y;
-    int x = GameState.items[Robot].x;
+    int y = Game.items[Robot].y;
+    int x = Game.items[Robot].x;
     size_t item_number = 0;
     bool approach_from_right = false;
 
@@ -488,14 +491,14 @@ static void MainLoop(void) {
         HandleResize();
         break;
       default:
-        MessageDraw("Use direction keys or Q to quit.");
+        DrawMessage("Use direction keys or Q to quit.");
         break;
     }
 
     // It's the edge of the world as we know it...
     if ((y < HeaderSize + FrameThickness) ||
-        (y >= GameState.lines - FrameThickness) || (x < FrameThickness) ||
-        (x >= GameState.columns - FrameThickness)) {
+        (y >= Game.lines - FrameThickness) || (x < FrameThickness) ||
+        (x >= Game.columns - FrameThickness)) {
       continue;
     }
 
@@ -503,13 +506,13 @@ static void MainLoop(void) {
     switch (TouchTest(y, x, &item_number)) {
       case TouchTestResultNone:
         // Robot moved.
-        // GameState.items[Robot].icon = " ";
-        // ItemDraw(&GameState.items[Robot]);
-        GameState.items[Robot].y = y;
-        GameState.items[Robot].x = x;
-        // GameState.items[Robot].icon = "🤖";
+        // Game.items[Robot].icon = " ";
+        // DrawItem(&Game.items[Robot]);
+        Game.items[Robot].y = y;
+        Game.items[Robot].x = x;
+        // Game.items[Robot].icon = "🤖";
         move(y, x);
-        ItemDraw(&GameState.items[Robot]);
+        DrawItem(&Game.items[Robot]);
         // move(y, x);
         // refresh();
         // Using RedrawScreen instead of refresh restores the icon the
@@ -523,7 +526,7 @@ static void MainLoop(void) {
         PlayAnimation(approach_from_right);
         Finish(EXIT_SUCCESS);
       case TouchTestResultNonKitten:
-        MessageDraw(GameState.messages[item_number]);
+        DrawMessage(Game.messages[item_number]);
         break;
     }
   }
