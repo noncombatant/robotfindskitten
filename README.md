@@ -1,3 +1,5 @@
+![A screenshot of the robotfindskitten game.](screenshot.png)
+
 # About
 
 robotfindskitten is a very fun adventure game for robots and humans. There are
