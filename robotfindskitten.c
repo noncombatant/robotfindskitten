@@ -121,8 +121,10 @@ static bool StringsEqual(const char* a, const char* b) {
 }
 
 static void Shuffle(char** array, size_t count) {
-  for (size_t i = 0; i < count - 1; ++i) {
+  assert(count > 2);
+  for (size_t i = 0; i < count - 2; ++i) {
     const size_t j = i + ((size_t)random() % (count - i));
+    assert(i <= j && j < count);
     char* temp = array[i];
     array[i] = array[j];
     array[j] = temp;
