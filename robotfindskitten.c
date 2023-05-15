@@ -506,17 +506,12 @@ static void MainLoop(void) {
     switch (TouchTest(y, x, &item_number)) {
       case TouchTestResultNone:
         // Robot moved.
-        // Game.items[Robot].icon = " ";
-        // DrawItem(&Game.items[Robot]);
         Game.items[Robot].y = y;
         Game.items[Robot].x = x;
-        // Game.items[Robot].icon = "🤖";
         move(y, x);
         DrawItem(&Game.items[Robot]);
-        // move(y, x);
-        // refresh();
         // Using RedrawScreen instead of refresh restores the icon the
-        // robot replaced, but is visibly slower.
+        // robot touched, but is visibly slower.
         RedrawScreen();
         break;
       case TouchTestResultRobot:
