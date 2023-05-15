@@ -56,8 +56,6 @@ static const char Introduction[] =
     "Press any key to start.\n";
 static const char WinMessage[] = "You found Kitten! Way to go, Robot!";
 
-static const size_t DefaultItemCount = 20;
-
 #define CONTROL(key) ((key)&0x1f)
 
 #define COUNT(a) (sizeof((a)) / sizeof((a)[0]))
@@ -110,20 +108,11 @@ typedef struct Item {
   char* icon;
 } Item;
 
-static struct Game {
-  int lines;
-  int columns;
-  bool screen_has_color;
-  unsigned int border_color;
-  size_t item_count;
-  Item items[COUNT(Messages)];
-  size_t message_count;
-  char** messages;
-  size_t icon_count;
-  char** icons;
-} Game;
+static Item g_items[COUNT(Messages)];
+static unsigned int g_border_color;
+static size_t g_non_kitten_count;
 
-// Special indices in the Game.items array.
+// Special indices in the g_items array.
 static const size_t Robot = 0;
 static const size_t Kitten = 1;
 static const size_t Bogus = 2;
@@ -142,12 +131,12 @@ static void Shuffle(char** array, size_t count) {
 }
 
 static int GetRandomX(void) {
-  return FrameThickness + (random() % (Game.columns - FrameThickness * 2));
+  return FrameThickness + (random() % (COLS - FrameThickness * 2));
 }
 
 static int GetRandomY(void) {
   return HeaderSize + FrameThickness +
-         (random() % (Game.lines - HeaderSize - FrameThickness * 2));
+         (random() % (LINES - HeaderSize - FrameThickness * 2));
 }
 
 static unsigned int GetRandomColor(void) {
@@ -173,8 +162,8 @@ typedef enum {
 } TouchTestResult;
 
 static TouchTestResult TouchTest(int y, int x, size_t* item_number) {
-  for (size_t i = 0; i < Game.item_count; ++i) {
-    if (Game.items[i].x == x && Game.items[i].y == y) {
+  for (size_t i = 0; i < g_non_kitten_count; ++i) {
+    if (g_items[i].x == x && g_items[i].y == y) {
       *item_number = i;
       if (Robot == i) {
         return TouchTestResultRobot;
@@ -193,22 +182,18 @@ static noreturn void Finish(int signal) {
   exit(signal);
 }
 
-static void InitializeGame(size_t item_count) {
-  Game.messages = Messages;
-  Game.message_count = COUNT(Messages);
+static void InitializeGame(size_t non_kitten_count) {
   // Shuffle only the items after the Robot and Kitten placeholders:
-  Shuffle(&Game.messages[Bogus], Game.message_count - Bogus);
+  Shuffle(&Messages[Bogus], COUNT(Messages) - Bogus);
   // Ensure that we did that correctly:
-  assert(StringsEqual("", Game.messages[Robot]));
-  assert(StringsEqual("", Game.messages[Kitten]));
+  assert(StringsEqual("", Messages[Robot]));
+  assert(StringsEqual("", Messages[Kitten]));
 
-  Game.item_count = Bogus + item_count;
+  g_non_kitten_count = Bogus + non_kitten_count;
 
-  Game.icons = Icons;
-  Game.icon_count = COUNT(Icons);
-  Shuffle(Game.icons, Game.icon_count);
+  Shuffle(Icons, COUNT(Icons));
 
-  Game.border_color = GetRandomColor();
+  g_border_color = GetRandomColor();
 
   // Set up (n)curses.
   initscr();
@@ -218,37 +203,35 @@ static void InitializeGame(size_t item_count) {
   intrflush(stdscr, false);
   keypad(stdscr, true);
 
-  Game.lines = LINES;
-  Game.columns = COLS;
-  if (((Game.lines - HeaderSize - FrameThickness) * Game.columns) <
-      (int)(item_count + 2)) {
+  if (((LINES - HeaderSize - FrameThickness) * COLS) <
+      (int)(non_kitten_count + 2)) {
     endwin();
     fprintf(stderr, "Screen too small to fit all objects!\n");
     exit(EXIT_FAILURE);
   }
 
-  Game.items[Robot].icon = "🤖";  // We are a curious robot.
-  Game.items[Robot].y = GetRandomY();
-  Game.items[Robot].x = GetRandomX();
+  g_items[Robot].icon = "🤖";  // We are a curious robot.
+  g_items[Robot].y = GetRandomY();
+  g_items[Robot].x = GetRandomX();
 
-  Game.items[Kitten].icon = GetRandomIcon();
+  g_items[Kitten].icon = GetRandomIcon();
   do {
-    Game.items[Kitten].y = GetRandomY();
-    Game.items[Kitten].x = GetRandomX();
-  } while (ItemsCoincide(&Game.items[Robot], &Game.items[Kitten]));
+    g_items[Kitten].y = GetRandomY();
+    g_items[Kitten].x = GetRandomX();
+  } while (ItemsCoincide(&g_items[Robot], &g_items[Kitten]));
 
-  for (size_t i = Bogus; i < Game.item_count; ++i) {
-    Game.items[i].icon = GetRandomIcon();
+  for (size_t i = Bogus; i < g_non_kitten_count; ++i) {
+    g_items[i].icon = GetRandomIcon();
     while (true) {
-      Game.items[i].y = GetRandomY();
-      Game.items[i].x = GetRandomX();
-      if (ItemsCoincide(&Game.items[Robot], &Game.items[i]) ||
-          ItemsCoincide(&Game.items[Kitten], &Game.items[i])) {
+      g_items[i].y = GetRandomY();
+      g_items[i].x = GetRandomX();
+      if (ItemsCoincide(&g_items[Robot], &g_items[i]) ||
+          ItemsCoincide(&g_items[Kitten], &g_items[i])) {
         continue;
       }
       size_t j;
       for (j = 0; j < i; ++j) {
-        if (ItemsCoincide(&Game.items[j], &Game.items[i])) {
+        if (ItemsCoincide(&g_items[j], &g_items[i])) {
           break;
         }
       }
@@ -258,10 +241,8 @@ static void InitializeGame(size_t item_count) {
     }
   }
 
-  Game.screen_has_color = false;
   start_color();
   if (has_colors() && (COLOR_PAIRS > 7)) {
-    Game.screen_has_color = true;
     init_pair(1, COLOR_GREEN, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
     init_pair(3, COLOR_YELLOW, COLOR_BLACK);
@@ -280,19 +261,20 @@ static void DrawItem(const Item* o) {
 static void DrawMessage(const char* message) {
   int y, x;
   getyx(curscr, y, x);
-  if (Game.screen_has_color) {
+  if (has_colors()) {
     attrset(COLOR_PAIR(White));
   }
   move(0, 0);
   clrtoeol();
-  mvprintw(0, 0, "%.*s", Game.columns, message);
+  mvprintw(0, 0, "%.*s", COLS, message);
   move(y, x);
   refresh();
 }
 
 static void RedrawScreen(void) {
-  const unsigned int attributes = COLOR_PAIR(Game.border_color) | A_BOLD;
-  if (Game.screen_has_color) {
+  const unsigned int attributes = COLOR_PAIR(g_border_color) | A_BOLD;
+  const bool colors = has_colors();
+  if (colors) {
     attron(attributes);
   }
   clear();
@@ -310,14 +292,14 @@ static void RedrawScreen(void) {
   }
 
   move(0, 0);
-  if (Game.screen_has_color) {
+  if (colors) {
     attroff(attributes);
   }
-  for (size_t i = 0; i < Game.item_count; ++i) {
-    DrawItem(&Game.items[i]);
+  for (size_t i = 0; i < g_non_kitten_count; ++i) {
+    DrawItem(&g_items[i]);
   }
-  move(Game.items[Robot].y, Game.items[Robot].x);
-  if (Game.screen_has_color) {
+  move(g_items[Robot].y, g_items[Robot].x);
+  if (colors) {
     attrset(COLOR_PAIR(White));
   }
   refresh();
@@ -325,12 +307,12 @@ static void RedrawScreen(void) {
 
 static void HandleResize(void) {
   int xbound = 0, ybound = 0;
-  for (size_t i = 0; i < Game.item_count; ++i) {
-    if (Game.items[i].x > xbound) {
-      xbound = Game.items[i].x;
+  for (size_t i = 0; i < g_non_kitten_count; ++i) {
+    if (g_items[i].x > xbound) {
+      xbound = g_items[i].x;
     }
-    if (Game.items[i].y > ybound) {
-      ybound = Game.items[i].y;
+    if (g_items[i].y > ybound) {
+      ybound = g_items[i].y;
     }
   }
 
@@ -342,8 +324,6 @@ static void HandleResize(void) {
     exit(EXIT_FAILURE);
   }
 
-  Game.lines = LINES;
-  Game.columns = COLS;
   RedrawScreen();
 }
 
@@ -364,36 +344,36 @@ static void PlayAnimation(bool approach_from_right) {
   const int animation_meet = (COLS / 2);
 
   Item kitten;
-  memcpy(&kitten, &Game.items[Kitten], sizeof(kitten));
+  memcpy(&kitten, &g_items[Kitten], sizeof(kitten));
 
   Item robot;
-  memcpy(&robot, &Game.items[Robot], sizeof(robot));
+  memcpy(&robot, &g_items[Robot], sizeof(robot));
 
-  Game.items[Robot].y = Game.items[Kitten].y = 0;
+  g_items[Robot].y = g_items[Kitten].y = 0;
   for (int i = 4; i > 0; --i) {
     printf("\a");
 
-    Game.items[Robot].icon = " ";
-    DrawItem(&Game.items[Robot]);
-    Game.items[Kitten].icon = " ";
-    DrawItem(&Game.items[Kitten]);
+    g_items[Robot].icon = " ";
+    DrawItem(&g_items[Robot]);
+    g_items[Kitten].icon = " ";
+    DrawItem(&g_items[Kitten]);
 
-    Game.items[Robot].icon = "🤖";
-    Game.items[Kitten].icon = "😺";
+    g_items[Robot].icon = "🤖";
+    g_items[Kitten].icon = "😺";
     if (approach_from_right) {
-      Game.items[Robot].x = animation_meet + i;
-      Game.items[Kitten].x = animation_meet - i + 1;
+      g_items[Robot].x = animation_meet + i;
+      g_items[Kitten].x = animation_meet - i + 1;
     } else {
-      Game.items[Robot].x = animation_meet - i + 1;
-      Game.items[Kitten].x = animation_meet + i;
+      g_items[Robot].x = animation_meet - i + 1;
+      g_items[Kitten].x = animation_meet + i;
     }
 
     DrawItem(&kitten);
     DrawItem(&robot);
 
-    DrawItem(&Game.items[Robot]);
-    DrawItem(&Game.items[Kitten]);
-    move(Game.items[Robot].y, Game.items[Robot].x);
+    DrawItem(&g_items[Robot]);
+    DrawItem(&g_items[Kitten]);
+    move(g_items[Robot].y, g_items[Robot].x);
     refresh();
     sleep(1);
   }
@@ -409,8 +389,8 @@ static void MainLoop(void) {
       break;
     }
 
-    int y = Game.items[Robot].y;
-    int x = Game.items[Robot].x;
+    int y = g_items[Robot].y;
+    int x = g_items[Robot].x;
     size_t item_number = 0;
     bool approach_from_right = false;
 
@@ -497,8 +477,8 @@ static void MainLoop(void) {
 
     // It's the edge of the world as we know it...
     if ((y < HeaderSize + FrameThickness) ||
-        (y >= Game.lines - FrameThickness) || (x < FrameThickness) ||
-        (x >= Game.columns - FrameThickness)) {
+        (y >= LINES - FrameThickness) || (x < FrameThickness) ||
+        (x >= COLS - FrameThickness)) {
       continue;
     }
 
@@ -506,10 +486,10 @@ static void MainLoop(void) {
     switch (TouchTest(y, x, &item_number)) {
       case TouchTestResultNone:
         // Robot moved.
-        Game.items[Robot].y = y;
-        Game.items[Robot].x = x;
+        g_items[Robot].y = y;
+        g_items[Robot].x = x;
         move(y, x);
-        DrawItem(&Game.items[Robot]);
+        DrawItem(&g_items[Robot]);
         // Using RedrawScreen instead of refresh restores the icon the
         // robot touched, but is visibly slower.
         RedrawScreen();
@@ -521,7 +501,7 @@ static void MainLoop(void) {
         PlayAnimation(approach_from_right);
         Finish(EXIT_SUCCESS);
       case TouchTestResultNonKitten:
-        DrawMessage(Game.messages[item_number]);
+        DrawMessage(Messages[item_number]);
         break;
     }
   }
@@ -537,7 +517,7 @@ int main(int count, char* arguments[]) {
 #endif
 
   unsigned int seed = (unsigned int)time(0);
-  size_t item_count = DefaultItemCount;
+  size_t non_kitten_count = 20;
   bool options_present = false;
 
   while (true) {
@@ -548,7 +528,7 @@ int main(int count, char* arguments[]) {
 
     switch (option) {
       case 'n': {
-        item_count = (size_t)abs(atoi(optarg));
+        non_kitten_count = (size_t)abs(atoi(optarg));
         options_present = true;
         break;
       }
@@ -559,13 +539,13 @@ int main(int count, char* arguments[]) {
       case 'h':
       case '?':
       default:
-        printf("Usage: %s [-n item-count] [-s seed]\n", arguments[0]);
+        printf("Usage: %s [-n non-kitten-count] [-s seed]\n", arguments[0]);
         exit(EXIT_SUCCESS);
     }
   }
 
   srandom(seed);
-  InitializeGame(item_count);
+  InitializeGame(non_kitten_count);
   if (!options_present) {
     ShowIntroduction();
   }
