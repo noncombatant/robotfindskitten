@@ -1,19 +1,19 @@
 # About
 
 robotfindskitten is a very fun adventure game for robots and humans. There are
-many versions of the game (you can see them all at
-[robotfindskitten.org](http://robotfindskitten.org/)), but this one is
-intended to be a decent learning vehicle for people new to the C programming
-language.
+[many versions of the game](http://robotfindskitten.org/), but this one is mine.
 
-I based this version on a C implementation by Alexey Toptygin, but simplified
-the implementation and re-cast it in a modern style. It also sheds all vestiges
-of the GNU Autotools build system. In fact, I was motivated to do this because I
-noticed that the build system boilerplate and infrastructure was 2 orders of
-magnitude larger than the code itself. That seemed wrong.
+Part of my intent was for it to be a decent learning vehicle for people new to
+the C programming language.
+
+I based this version on a version by Alexey Toptygin, but simplified it and
+re-cast it in a modern style. It also sheds all vestiges of the GNU Autotools
+build system. I noticed that the build system boilerplate and infrastructure was
+2 orders of magnitude larger than the code itself. That seemed wrong.
 
 By perusing the Git history, you can see the steps I followed to get from
-Alexey’s original to this version.
+Alexey’s original to this version. Thank you, Alexey! And thank you to Leonard
+Richardson, who originated robotfindskitten.
 
 ## Building And Installing
 
@@ -40,7 +40,7 @@ make
 ./robotfindskitten
 ```
 
-To install, do the preceeding and then copy the robotfindskitten binary to a
+To install, do the preceding and then copy the robotfindskitten binary to a
 place in your `$PATH`. A good place might be `$HOME/bin`, `/usr/games`, or
 `/usr/local/games`.
 
@@ -60,8 +60,6 @@ change the game play in ways you find fun. Here are some ideas:
   * Add some more non-kitten item descriptions
   * Add functionality to read additional non-kitten item descriptions from a
     filename provided on the command line
-  * Use Unicode characters as well as ASCII characters for the non-kitten item
-    display on screen
   * Add command line options to set the size of the game field (currently, the
     game uses the entire screen)
   * Develop a scoring system, and display the score on the screen (e.g., as
@@ -73,7 +71,7 @@ change the game play in ways you find fun. Here are some ideas:
 ### Basics Of Reading C
 
 I assume that most people reading this are coming from a background programming
-in a very high-level language (VHLL) like Python, JavaScript, or Ruby. C is
+in a very high-level language like Python, JavaScript, or Ruby. C is
 significantly different than those languages in several ways:
 
   * Before you can run a program written in C, you must first _compile_
@@ -134,10 +132,9 @@ The 3 in `man 3 foo` refers to the _chapter_ of the Unix manual: chapter 3 is
 for C library functions. Chapter 1 is for command-line programs, and Chapter 2
 is for kernel system calls. (See `man 1 man` for more information.)
 
-A good manual page to read might be `man 3 getopt`. `getopt` is a C library
-function that parses the command line, and on most systems the manual page
-includes an example of how to use it. (You can also read the use of `getopt` in
-`robotfindskitten.c`, of course.)
+A good manual page to read is `man 3 getopt`. `getopt` is a C library function
+that parses the command line, and on most systems the manual page includes an
+example of how to use it. Also read use of `getopt` in `robotfindskitten.c`.
 
 Here are some more good manual pages to read (all in chapter 3), that might help
 you when implementing changes to robotfindskitten:
@@ -163,10 +160,9 @@ Now that computers are cheap and text editors are good, we can afford to write
 code that looks like it means something. Hence the ‘modern’ naming conventions
 used in this code:
 
-  * `GlobalName` (including functions like `EatFood` and `RemoveStuff`)
+  * `GlobalName` (including functions like `GetRandomIcon` and `InitializeGame`)
   * `local_name` (including `struct` members and function-local variables)
-  * `i` and `j` for loop iterator variables (or other ‘obvious’ names, like
-    `Object o`)
+  * `i` and `j` for loop iterator variables
 
 ### Further Reading
 
@@ -184,4 +180,4 @@ _lex & yacc_ (2nd edition) by Brown, Levine, and Mason describes how you can
 parse complex input languages in C.
 
 _Expert C Programming: Deep C Secrets_ by van der Linden is an amazingly great
-(and, disconcerting) look into how C works (and, doesn’t work) under the hood.
+(and hilarious) look into how C works (and, doesn’t work) under the hood.
