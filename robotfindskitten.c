@@ -189,10 +189,8 @@ static void InitializeGame(size_t non_kitten_count) {
   assert(StringsEqual("", Messages[Robot]));
   assert(StringsEqual("", Messages[Kitten]));
 
-  g_non_kitten_count = Bogus + non_kitten_count;
-
   Shuffle(Icons, COUNT(Icons));
-
+  g_non_kitten_count = Bogus + non_kitten_count;
   g_border_color = GetRandomColor();
 
   // Set up (n)curses.
@@ -476,9 +474,8 @@ static void MainLoop(void) {
     }
 
     // It's the edge of the world as we know it...
-    if ((y < HeaderSize + FrameThickness) ||
-        (y >= LINES - FrameThickness) || (x < FrameThickness) ||
-        (x >= COLS - FrameThickness)) {
+    if ((y < HeaderSize + FrameThickness) || (y >= LINES - FrameThickness) ||
+        (x < FrameThickness) || (x >= COLS - FrameThickness)) {
       continue;
     }
 
