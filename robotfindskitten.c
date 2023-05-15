@@ -20,7 +20,6 @@
 #define _XOPEN_SOURCE_EXTENDED
 
 #include <assert.h>
-#include <dirent.h>
 #include <getopt.h>
 #include <locale.h>
 #include <ncurses.h>
