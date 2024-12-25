@@ -154,7 +154,7 @@ static bool ItemsCoincide(const Item* a, const Item* b) {
   return a->x == b->x && a->y == b->y;
 }
 
-typedef enum {
+typedef enum TouchTestResult {
   TouchTestResultNone,
   TouchTestResultRobot,
   TouchTestResultKitten,
